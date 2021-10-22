@@ -7,7 +7,7 @@ import java.util.Scanner;
  *
  * @author ethan
  */
-public class ConsoleGame {
+public class CavedMain {
 
     /**
      * @param args the command line arguments
@@ -73,7 +73,7 @@ public class ConsoleGame {
 
         int[][][] cd
                 = {
-                    {{188, 233, 243, 242, 253, 186, 184, 182, 355, 295}, {21}, {31}},
+                    {{188, 233, 243, 242, 253, 186, 184, 182, 355, 295}, {0}, {0}},
                     {{0}, {0}, {0}},
                     {{0}, {0}, {0}}
 
