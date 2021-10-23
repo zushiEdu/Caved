@@ -52,6 +52,9 @@ public class CavedMain {
             - item in which only a player can pass through acting as an automatic door
         Change characters on screen to easier to read characters
             - search through ascii tables for this
+        
+        ### KNOWN BUGS ####
+            - sometimes when mining one of the last blocks in chunk array it doesn't dissapear the first time
          */
         Scanner input_Int = new Scanner(System.in);
         Scanner input_String = new Scanner(System.in);
@@ -73,12 +76,11 @@ public class CavedMain {
 
         int[][][] cd
                 = {
-                    {{188, 233, 243, 242, 253, 186, 184, 182, 355, 295}, {0}, {0}},
-                    {{0}, {0}, {0}},
+                    {{188, 233, 243, 242, 253, 186, 184, 182, 355, 295}, {121, 131}, {0}},
+                    {{111, 121}, {0}, {0}},
                     {{0}, {0}, {0}}
-
                 };
-        int[] c = {1, 1};
+        int[] c = {0, 0};
 
         int lowX;
         int lowY;
@@ -92,9 +94,9 @@ public class CavedMain {
 
         int in = 0;
 
-        int bI = cd[c[0] - 1][c[1] - 1][in] / 100;
-        int bX = cd[c[0] - 1][c[1] - 1][in] / 10 - (cd[c[0] - 1][c[1] - 1][in] / 100) * 10;
-        int bY = cd[c[0] - 1][c[1] - 1][in] - cd[c[0] - 1][c[1] - 1][in] / 10 * 10;
+        int bI = cd[c[1]][c[0]][in] / 100;
+        int bX = cd[c[1]][c[0]][in] / 10 - (cd[c[1]][c[0]][in] / 100) * 10;
+        int bY = cd[c[1]][c[0]][in] - cd[c[1]][c[0]][in] / 10 * 10;
 
         boolean stopState;
 
@@ -104,10 +106,10 @@ public class CavedMain {
 
         // master game loop
         while (run) {
-            lowX = 9 * c[0] - 8;
-            lowY = 9 * c[1] - 8;
-            highX = mapSize * c[0];
-            highY = mapSize * c[1];
+            lowX = 9 * (c[0] + 1) - 8;
+            lowY = 9 * (c[1] + 1) - 8;
+            highX = mapSize * (c[0] + 1);
+            highY = mapSize * (c[1] + 1);
 
             // prints health tag
             System.out.print("[HEA:]");
@@ -133,17 +135,19 @@ public class CavedMain {
 
             // print mapSize rows
             for (int y = lowY; y <= highY; y++) {
+
                 System.out.print("[" + y + "      ");
                 // print mapSize collums
                 for (int x = lowX; x <= highX; x++) {
 
                     in = 0;
                     stopState = false;
-                    while (stopState == false && in < cd[c[0] - 1][c[1] - 1].length) {
+                    while (stopState == false && in < cd[c[1]][c[0]].length) {
                         // extracts map data
-                        bI = cd[c[0] - 1][c[1] - 1][in] / 100;
-                        bX = cd[c[0] - 1][c[1] - 1][in] / 10 - (cd[c[0] - 1][c[1] - 1][in] / 100) * 10;
-                        bY = cd[c[0] - 1][c[1] - 1][in] - cd[c[0] - 1][c[1] - 1][in] / 10 * 10;
+                        bI = cd[c[1]][c[0]][in] / 100;
+                        bX = (cd[c[1]][c[0]][in] / 10 - (cd[c[1]][c[0]][in] / 100) * 10) + (c[0] * 9);
+                        bY = (cd[c[1]][c[0]][in] - cd[c[1]][c[0]][in] / 10 * 10) + (c[1] * 9);
+                        
                         if (bX == x && bY == y) {
                             stopState = true;
                         } else {
@@ -191,7 +195,7 @@ public class CavedMain {
                 if (playerX < highX) {
                     playerX++;
                 } else if (playerX == highX) {
-                    if (c[0] < 3) {
+                    if (c[0] < 2) {
                         c[0]++;
                         playerX++;
                     }
@@ -201,7 +205,7 @@ public class CavedMain {
                 if (playerX > lowX) {
                     playerX--;
                 } else if (playerX == lowX) {
-                    if (c[0] > 1) {
+                    if (c[0] > 0) {
                         c[0]--;
                         playerX--;
                     }
@@ -211,7 +215,7 @@ public class CavedMain {
                 if (playerY > lowY) {
                     playerY--;
                 } else if (playerY == lowY) {
-                    if (c[1] > 1) {
+                    if (c[1] > 0) {
                         c[1]--;
                         playerY--;
                     }
@@ -221,7 +225,7 @@ public class CavedMain {
                 if (playerY < highY) {
                     playerY++;
                 } else if (playerY == highY) {
-                    if (c[1] < 3) {
+                    if (c[1] < 2) {
                         c[1]++;
                         playerY++;
                     }
@@ -244,22 +248,22 @@ public class CavedMain {
 
                 while (stop == false) {
                     // mine block to the right
-                    for (int index = 0; index < cd[c[0] - 1][c[1] - 1].length; index++) {
+                    for (int index = 0; index < cd[c[1]][c[0]].length; index++) {
                         // search through map data
-                        if (cd[c[0] - 1][c[1] - 1][index] - cd[c[0] - 1][c[1] - 1][index] / 100 * 100 == (playerX + offset) * 10 + playerY) {
+                        if (cd[c[1]][c[0]][index] - cd[c[1]][c[0]][index] / 100 * 100 == (playerX + offset) * 10 + playerY) {
                             // found matching block to the right or left depending on offset
 
                             // add the matching block to the inventory
-                            int type = cd[c[0] - 1][c[1] - 1][index] / 100 - 1;
+                            int type = cd[c[1]][c[0]][index] / 100 - 1;
                             inv[type]++;
 
                             // removes block from database
                             // if data is at the top change it to zero
-                            for (int loop = 0; loop < cd[c[0] - 1][c[1] - 1].length; loop++) {
-                                if (index + loop < cd[c[0] - 1][c[1] - 1].length) {
-                                    cd[c[0] - 1][c[1] - 1][index] = cd[c[0] - 1][c[1] - 1][index + loop];
+                            for (int loop = 0; loop < cd[c[1]][c[0]].length; loop++) {
+                                if (index + loop < cd[c[1]][c[0]].length) {
+                                    cd[c[1]][c[0]][index] = cd[c[1]][c[0]][index + loop];
                                 } else {
-                                    cd[c[0] - 1][c[1] - 1][index] = 0;
+                                    cd[c[1]][c[0]][index] = 0;
                                 }
                             }
 
@@ -271,10 +275,10 @@ public class CavedMain {
                 // use block to the right
                 int index = 0;
                 boolean stopConditon = false;
-                while (index < cd[c[0] - 1][c[1] - 1].length && stopConditon == false) {
-                    if (cd[c[0] - 1][c[1] - 1][index] - cd[c[0] - 1][c[1] - 1][index] / 100 * 100 == (playerX + 1) * 10 + playerY) {
+                while (index < cd[c[1]][c[0]].length && stopConditon == false) {
+                    if (cd[c[1]][c[0]][index] - cd[c[1]][c[0]][index] / 100 * 100 == (playerX + 1) * 10 + playerY) {
                         // if there is a block to the right
-                        if (cd[c[0] - 1][c[1] - 1][index] / 100 == 3) {
+                        if (cd[c[1]][c[0]][index] / 100 == 3) {
                             //if block to the right is a crafting bench
                             System.out.println("Type item to craft");
                             String item = input_String.nextLine();
@@ -343,9 +347,9 @@ public class CavedMain {
                         if (inv[1] >= 1) {
                             // place block to the right
                             // makes a copy of map data into newArr with an extra value at the end                
-                            int[] newArr = Arrays.copyOf(cd[c[0] - 1][c[1] - 1], cd[c[0] - 1][c[1] - 1].length + 1);
-                            cd[c[0] - 1][c[1] - 1] = newArr;
-                            cd[c[0] - 1][c[1] - 1][cd[c[0] - 1][c[1] - 1].length - 1] = 200 + (playerX + offset) * 10 + playerY * 1;
+                            int[] newArr = Arrays.copyOf(cd[c[1]][c[0]], cd[c[1]][c[0]].length + 1);
+                            cd[c[1]][c[0]] = newArr;
+                            cd[c[1]][c[0]][cd[c[1]][c[0]].length - 1] = 200 + (playerX + offset) * 10 + playerY * 1;
                             inv[1]--;
                             validInput = false;
                         } else {
@@ -356,9 +360,9 @@ public class CavedMain {
                         if (inv[2] >= 1) {
                             // place block to the right
                             // makes a copy of map data into newArr with an extra value at the end                
-                            int[] newArr = Arrays.copyOf(cd[c[0] - 1][c[1] - 1], cd[c[0] - 1][c[1] - 1].length + 1);
-                            cd[c[0] - 1][c[1] - 1] = newArr;
-                            cd[c[0] - 1][c[1] - 1][cd[c[0] - 1][c[1] - 1].length - 1] = 300 + (playerX + offset) * 10 + playerY * 1;
+                            int[] newArr = Arrays.copyOf(cd[c[1]][c[0]], cd[c[1]][c[0]].length + 1);
+                            cd[c[1]][c[0]] = newArr;
+                            cd[c[1]][c[0]][cd[c[1]][c[0]].length - 1] = 300 + (playerX + offset) * 10 + playerY * 1;
                             inv[2]--;
                             validInput = false;
                         } else {
@@ -369,9 +373,9 @@ public class CavedMain {
                         if (inv[0] >= 1) {
                             // place block to the right
                             // makes a copy of map data into newArr with an extra value at the end                
-                            int[] newArr = Arrays.copyOf(cd[c[0] - 1][c[1] - 1], cd[c[0] - 1][c[1] - 1].length + 1);
-                            cd[c[0] - 1][c[1] - 1] = newArr;
-                            cd[c[0] - 1][c[1] - 1][cd[c[0] - 1][c[1] - 1].length - 1] = 100 + (playerX + offset) * 10 + playerY * 1;
+                            int[] newArr = Arrays.copyOf(cd[c[1]][c[0]], cd[c[0]][c[1]].length + 1);
+                            cd[c[1]][c[0]] = newArr;
+                            cd[c[1]][c[0]][cd[c[1]][c[0]].length - 1] = 100 + (playerX + offset) * 10 + playerY * 1;
                             inv[0]--;
                             validInput = false;
                         } else {
@@ -389,8 +393,8 @@ public class CavedMain {
             // System.out.print("\033[H\033[2J");
             // System.out.flush();
             // command to print current chunk data
-            // for (int i = 0; i < cd[c[0] - 1][c[1] - 1].length; i++) {
-            //     System.out.println(cd[c[0] - 1][c[1] - 1][i]);
+            // for (int i = 0; i < cd[c[1]][c[0]].length; i++) {
+            //     System.out.println(cd[c[1]][c[0]][i]);
             // }
         }
     }
