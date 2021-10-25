@@ -74,6 +74,8 @@ public class CavedMain {
         String reset = "\u001B[0m";
         String player = "\u001B[34m";
 
+		// new map data \/
+
         int[][][] cd
                 = {
                     {{188, 233, 243, 242, 253, 186, 184, 182, 355, 295}, {121, 131}, {0}},
