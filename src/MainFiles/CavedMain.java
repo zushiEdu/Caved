@@ -74,8 +74,7 @@ public class CavedMain {
         String reset = "\u001B[0m";
         String player = "\u001B[34m";
 
-		// new map data \/
-
+        // new map data \/
         int[][][] cd
                 = {
                     {{188, 233, 243, 242, 253, 186, 184, 182, 355, 295}, {121, 131}, {0}},
@@ -149,7 +148,7 @@ public class CavedMain {
                         bI = cd[c[1]][c[0]][in] / 100;
                         bX = (cd[c[1]][c[0]][in] / 10 - (cd[c[1]][c[0]][in] / 100) * 10) + (c[0] * 9);
                         bY = (cd[c[1]][c[0]][in] - cd[c[1]][c[0]][in] / 10 * 10) + (c[1] * 9);
-                        
+
                         if (bX == x && bY == y) {
                             stopState = true;
                         } else {
