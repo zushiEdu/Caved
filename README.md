@@ -1,7 +1,7 @@
 # Caved
 A replit with the same code can be found at https://replit.com/@zushiEdu/Caved
 
-## Future features
+### Future features
 1. Make tools have function
     1. More efficient block mining requiring a rework of the map system
 2. Add enemies
