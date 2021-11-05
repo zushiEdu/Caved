@@ -135,22 +135,48 @@ public class CavedMain {
                         // dirt
                         chunks[y][x][i] = new BlockData(1, randX, randY, dur);
                         i++;
-                    } else if (chance % 8 == 0) {
+                    } else if (chance % 7 == 0) {
                         // wood
                         chunks[y][x][i] = new BlockData(2, randX, randY, dur);
                         i++;
-                    } else if (chance % 7 == 0) {
+                    } else if (chance % 12 == 0) {
                         // crafting table
                         chunks[y][x][i] = new BlockData(3, randY, randY, dur);
                         i++;
                     }
                 }
-                for (int j = 0; j < chunks[y][x].length; j++) {
-                    if (chunks[y][x][j] != null) {
-                        System.out.println(chunks[y][x][j].x + "" + chunks[y][x][j].y + "" + chunks[y][x][j].id);
+            }
+        }
+
+        for (int y = 1; y <= 9; y++) {
+            for (int x = 1; x <= 9; x++) {
+                in = 0;
+                stopState = false;
+                while (stopState == false && in < chunks[0][0].length) {
+                    // extracts map data
+                    if (chunks[0][0][in] != null) {
+                        bI = chunks[0][0][in].id;
+                        bX = chunks[0][0][in].x;
+                        bY = chunks[0][0][in].y;
+                    }
+
+                    if (bX == x && bY == y) {
+                        stopState = true;
+                    } else {
+                        in++;
                     }
                 }
+
+                // print block with corrosponding information
+                if (bX == x && bY == y) {
+                    System.out.print(charColors[bI] + chars[bI] + " " + reset);
+                } else if (playerX == x && playerY == y) {
+                    System.out.print(player + "P " + reset);
+                } else {
+                    System.out.print("\u001B[32m" + "O " + reset);
+                }
             }
+            System.out.println("");
         }
 
         // master game loop
