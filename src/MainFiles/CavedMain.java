@@ -92,7 +92,7 @@ public class CavedMain {
             {{}, {}, {}}
         };
         
-        // map gen should go in BlockData
+        // whole map gen should go in BlockData
         // option to load random map or load from file
         // init goes in CavedMain
         
