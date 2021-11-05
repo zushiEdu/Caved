@@ -1,7 +1,7 @@
 # Caved
-A replit with the same code can be found at https://replit.com/@zushiEdu/Caved
+>A replit containing this game can be found [here](https://replit.com/@zushiEdu/Caved).
 
-### Future features
+#### Future features
 1. Make tools have function
     1. More efficient block mining requiring a rework of the map system
 2. Add enemies
@@ -24,3 +24,7 @@ A replit with the same code can be found at https://replit.com/@zushiEdu/Caved
     5. Cave data is stored as objects
 6. Custom ascii characters?
     1. This could be acompalished by making a custom font and having the game use that font
+
+#### Known Bugs
+1. Sometimes when mining blocks it adds one of that item to the inventory without actually mining it
+    1. This lets blocks to be picked up more than one time(s)
