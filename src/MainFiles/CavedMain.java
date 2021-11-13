@@ -179,8 +179,6 @@ public class CavedMain {
             System.out.println("");
         }
 
-        
-        
         // master game loop
         while (run) {
             lowX = 9 * (c[0] + 1) - 8;
@@ -467,12 +465,14 @@ public class CavedMain {
             }
 
             // clears console after every loop but doesn't work in netbeans for unknown reason
-            // System.out.print("\033[H\033[2J");
-            // System.out.flush();
+            System.out.print("\033[H\033[2J");
+            System.out.flush();
             // command to print current chunk data
             // for (int i = 0; i < cd[c[1]][c[0]].length; i++) {
             //     System.out.println(cd[c[1]][c[0]][i]);
             // }
         }
+        input_Int.close();
+        input_String.close();
     }
 }
