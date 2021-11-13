@@ -179,6 +179,8 @@ public class CavedMain {
             System.out.println("");
         }
 
+        
+        
         // master game loop
         while (run) {
             lowX = 9 * (c[0] + 1) - 8;
