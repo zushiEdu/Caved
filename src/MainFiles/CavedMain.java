@@ -1,21 +1,20 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
 package MainFiles;
 
-import java.util.Arrays;
+import java.util.Random;
 import java.util.Scanner;
-import MainFiles.BlockData;
 
 /**
  *
- * @author ethan
+ * @author Ethan
  */
 public class CavedMain {
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-
-        /* TODO
+    /* TODO
         Make tools do something
             - turn block data into an array of values [durability, type, x, y]
                 - this not only benifits not having to retrofit all code with this new data type but also makes for future expansion easier
@@ -48,432 +47,368 @@ public class CavedMain {
             - search through ascii tables for this
         
         ### KNOWN BUGS ####
-            - sometimes when mining one of the last blocks in chunk array it doesn't dissapear the first time
-         */
-        Scanner input_Int = new Scanner(System.in);
-        Scanner input_String = new Scanner(System.in);
+     */
+    /**
+     * @param args the command line arguments
+     */
+    static Scanner input = new Scanner(System.in);
 
-        int mapSize = 9;
+    // map related variables
+    static String[] chars = {"W", "D", "C"};
+    static String[] charColors = {"\u001B[33m", "\u001B[33m", "\u001B[34m"};
+    static String reset = "\u001B[0m";
+    static String playerC = "\u001B[36m";
+    static String health = "\u001B[31m";
 
-        // sets default location
-        int playerX = 1;
-        int playerY = 1;
+    static int chunkX = 0;
+    static int chunkY = 0;
 
-        int playerHealth = 1;
+    // general player related variables
+    static int playerX = 0;
+    static int playerY = 0;
 
-        // sets character and map data
-        String[] chars = {"", "W", "D", "C"};
-        String[] charColors = {"", "\u001B[33m", "\u001B[33m", "\u001B[34m"};
+    static int playerHp = 3;
+    // inventory player related variables
+    static String[] tb = {"  ", "  ", "  "};
+    static int[] inv = {0, 0, 0};
+    static int invPos = 0;
 
-        String reset = "\u001B[0m";
-        String player = "\u001B[34m";
+    // general game variables
+    static boolean run = true;
 
-        // new map data \/
-        int[][][] cd
-                = {
-                    {{188, 233, 243, 184, 182, 355, 295}, {121, 131}, {0}},
-                    {{111, 121}, {0}, {0}},
-                    {{0}, {0}, {0}}
-                };
+    static int size = inputInt("Enter desired size of map to generate in multiples of 9");
+    static BlockData map[][] = new BlockData[size][size];
 
-        // TODO integrate new map system
-        BlockData chunks[][][] = new BlockData[3][3][81];
+    public static void main(String[] args) {
+        // TODO code application logic here
 
-        // whole map gen should go in BlockData
-        // option to load random map or load from file
-        // init goes in CavedMain
-        // chunks[0][0][0].id);
-        //        r  c  b
-        // r = row c[1]
-        // c = collum c[0]
-        // b = block i
-        int[] c = {0, 0};
+        map = genMap(size);
+        while (run) {
+            topUI();
+            printChunk(map);
+            //printMap(map);
+            bottomUI();
+            userInput();
 
-        int lowX;
-        int lowY;
-        int highX;
-        int highY;
+            System.out.print("\033[H\033[2J");
+            System.out.flush();
+        }
+        input.close();
+    }
 
-        String[] tb = {"  ", "  ", "  "};
-        int[] inv = {0, 0, 0};
-
-        int invPos = 0;
-
-        int in = 0;
-
-        int bI = cd[c[1]][c[0]][in] / 100;
-        int bX = cd[c[1]][c[0]][in] / 10 - (cd[c[1]][c[0]][in] / 100) * 10;
-        int bY = cd[c[1]][c[0]][in] - cd[c[1]][c[0]][in] / 10 * 10;
-
-        boolean stopState;
-
+    public static void userInput() {
         String instruction;
+        instruction = inputString("");
+        instruction = instruction.toUpperCase();
 
-        boolean run = true;
+        /*
+        
+        To add an if statement put this sequence after the last condition
+        
+         if (instruction.equals("")) {
 
-        // map generation
-        //        Make world gen
-        //    - 1 in 9 chance of dirt spawn
-        //        out of 9 random generated numbers one should match 9
-        //    - 1 in 27 chance of wood spawn
-        //      out of 27 random generated numbers one should match 27
-        //    - 1 in 81 chance of cave spawn
-        //      out of 81 random generated numbers one should match 81
-        //      ids follow as: 1, 2, 3
-        // i is row 
-        for (int y = 0; y < 3; y++) {
-            // j is collum
-            for (int x = 0; x < 3; x++) {
-                // blocks within chunk
-                int i = 0;
-                for (int b = 0; b < 81; b++) {
-                    int randX = (int) Math.floor(Math.random() * 9);
-                    int randY = (int) Math.floor(Math.random() * 9);
-                    int dur = 2;
-                    //
-                    int chance = (int) Math.floor(Math.random() * 100);
-                    if (chance % 9 == 0) {
-                        // dirt
-                        chunks[y][x][i] = new BlockData(1, randX, randY, dur);
-                        i++;
-                    } else if (chance % 7 == 0) {
-                        // wood
-                        chunks[y][x][i] = new BlockData(2, randX, randY, dur);
-                        i++;
-                    } else if (chance % 12 == 0) {
-                        // crafting table
-                        chunks[y][x][i] = new BlockData(3, randY, randY, dur);
-                        i++;
-                    }
-                }
+        } else
+        
+         */
+        // movement
+        if (instruction.equals("W")) {
+            move(0, -1);
+        } else if (instruction.equals("A")) {
+            move(-1, 0);
+        } else if (instruction.equals("S")) {
+            move(0, 1);
+        } else if (instruction.equals("D")) {
+            move(1, 0);
+        }
+
+        // mining
+        if (instruction.charAt(0) == 'M') {
+            char secondChar = instruction.charAt(1);
+            if (secondChar == 'R') {
+                mineBlock(1, 0);
+            } else if (secondChar == 'L') {
+                mineBlock(-1, 0);
+            } else if (secondChar == 'U') {
+                mineBlock(0, -1);
+            } else if (secondChar == 'D') {
+                mineBlock(0, 1);
             }
         }
 
-        for (int y = 1; y <= 9; y++) {
-            for (int x = 1; x <= 9; x++) {
-                in = 0;
-                stopState = false;
-                while (stopState == false && in < chunks[0][0].length) {
-                    // extracts map data
-                    if (chunks[0][0][in] != null) {
-                        bI = chunks[0][0][in].id;
-                        bX = chunks[0][0][in].x;
-                        bY = chunks[0][0][in].y;
-                    }
+        // placing
+        if (instruction.charAt(0) == 'P') {
+            char secondChar = instruction.charAt(1);
+            if (secondChar == 'R') {
+                placeBlock(1, 0);
+            } else if (secondChar == 'L') {
+                placeBlock(-1, 0);
+            } else if (secondChar == 'U') {
+                placeBlock(0, -1);
+            } else if (secondChar == 'D') {
+                placeBlock(0, 1);
+            }
+        }
 
-                    if (bX == x && bY == y) {
-                        stopState = true;
-                    } else {
-                        in++;
-                    }
+        // inv checker
+        if (instruction.equals("INV")) {
+            for (int i = 0; i < inv.length; i++) {
+                System.out.println(inv[i] + "" + chars[i] + " ");
+            }
+        }
+
+        // game force quit
+        if (instruction.equals("STOP") || instruction.equals("EXIT")) {
+            System.out.println("Hope to see you again");
+            System.out.println("Have a good day user");
+            run = false;
+        }
+
+        // scrolling of hotbar
+        if (instruction.equals("Q")) {
+            if (invPos > 0) {
+                invPos--;
+            }
+        } else if (instruction.equals("E")) {
+            if (invPos < inv.length - 2) {
+                invPos++;
+            }
+        }
+
+        // crafting
+        if (instruction.charAt(0) == 'E') {
+            char secondChar = instruction.charAt(1);
+            if (secondChar == 'U') {
+                craft(0, -1);
+            } else if (secondChar == 'R') {
+                craft(1, 0);
+            } else if (secondChar == 'D') {
+                craft(0, 1);
+            } else if (secondChar == 'L') {
+                craft(-1, 0);
+            } else if (secondChar == 'I') {
+                if (inv[0] >= 4) {
+                    inv[2]++;
+                    System.out.println("Crafting bench crafted");
+                } else {
+                    System.out.println("Not enough wood to make crafting bench");
                 }
+            }
+        }
+    }
 
-                // print block with corrosponding information
-                if (bX == x && bY == y) {
-                    System.out.print(charColors[bI] + chars[bI] + " " + reset);
-                } else if (playerX == x && playerY == y) {
-                    System.out.print(player + "P " + reset);
+    public static void craft(int x, int y) {
+        if (map[playerY + y][playerX + x] != null) {
+            if (map[playerY + y][playerX + x].id == 2) {
+                // the item to the offset space is a crafting bench
+                System.out.println("What item do you want to craft?");
+                System.out.println("Possible items include: dirt cake, axe, ct(crafting table)");
+                String item = inputString("Type name of item to craft");
+                item = item.toUpperCase();
+                if (item.equals("DIRT")) {
+                    if (inv[1] >= 1) {
+                        playerHp++;
+                        System.out.println("A dirt cake was crafted and consumed");
+                        inv[1]--;
+                    } else {
+                        System.out.println("Not enough dirt to make dirt cake");
+                    }
+                } else if (item.equals("AXE")) {
+                    if (inv[0] >= 2) {
+                        tb[0] = "AX";
+                        System.out.println("An axe was crafted");
+                        inv[0] = inv[0] - 2;
+                    } else {
+                        System.out.println("Not enough wood to make an axe");
+                    }
+                } else {
+                    System.out.println(item);
+                }
+            }
+        } else {
+            System.out.println("No crafting table here");
+        }
+    }
+
+    public static void placeBlock(int x, int y) {
+        System.out.println("What block do you want to place?");
+        System.out.println("For wood enter 0, for dirt enter 1 and for a crafting bench enter 2");
+        System.out.println("Amounts of each block are as the following");
+        int block = inputInt("Wood: " + inv[0] + " / Dirt: " + inv[1] + " / CB: " + inv[2]);
+
+        // if block to the offset doesnt exist then place block
+        if (!checkBlock(playerX + x, playerY + y)) {
+            // if enough blocks in inv exists
+            if (inv[block] > 0) {
+                // remove block
+                inv[block]--;
+                map[playerY + y][playerX + x] = new BlockData(block, playerX + x, playerY + y, 2);
+            } else {
+                System.out.println("Not enough blocks of that type");
+            }
+        }
+    }
+
+    public static void mineBlock(int x, int y) {
+        // if block to the offset exists mine it
+        if (checkBlock(playerX + x, playerY + y)) {
+            // add block id to the right to inventory
+            inv[map[playerY + y][playerX + x].id]++;
+            // set id of block to the right to null
+            map[playerY + y][playerX + x] = null;
+        }
+    }
+
+    public static boolean checkBlock(int x, int y) {
+        if (map[y][x] != null) {
+            return true;
+        }
+        return false;
+    }
+
+    // user input methods
+    public static void move(int x, int y) {
+        int highX = (chunkX + 1) * 9;
+        int lowX = (chunkX + 1) * 9 - 9;
+
+        int highY = (chunkY + 1) * 9;
+        int lowY = (chunkY + 1) * 9 - 9;
+
+        if (playerX + x >= lowX && playerX + x < highX) {
+            // if within bounds of chunk move normally
+            playerX = playerX + x;
+        } else if (playerX == lowX || playerX == highX - 1) {
+            // if at edge of chunk check if not at edge of map
+            // if not at map offset chunk and player
+            if (chunkX + x >= 0 && chunkX + x <= (size / 9) - 1) {
+                chunkX = chunkX + x;
+                playerX = playerX + x;
+            }
+        }
+
+        if (playerY + y < highY && playerY + y >= lowY) {
+            // if within bounds of chunk move normally
+            playerY = playerY + y;
+        } else if (playerY == lowY || playerY == highY - 1) {
+            // if at edge of chunk check if not at edge of map
+            // if not at map offset chunk and player
+            if (chunkY + y <= (size / 9) - 1 && chunkY + y >= 0) {
+                chunkY = chunkY + y;
+                playerY = playerY + y;
+            }
+        }
+    }
+
+    // map and user interface methods
+    public static void printMap(BlockData[][] map) {
+        for (int y = 0; y < map.length; y++) {
+            System.out.print("[|      ");
+            for (int x = 0; x < map[y].length; x++) {
+                if (map[y][x] != null) {
+                    System.out.print(charColors[map[y][x].id] + chars[map[y][x].id] + " " + reset);
+                } else if (y == playerY && x == playerX) {
+                    System.out.print(playerC + "P " + reset);
                 } else {
                     System.out.print("\u001B[32m" + "O " + reset);
                 }
             }
+            System.out.print("     |]");
             System.out.println("");
         }
+    }
 
-        // master game loop
-        while (run) {
-            lowX = 9 * (c[0] + 1) - 8;
-            lowY = 9 * (c[1] + 1) - 8;
-            highX = mapSize * (c[0] + 1);
-            highY = mapSize * (c[1] + 1);
-
-            // prints health tag
-            System.out.print("[HEA:]");
-
-            // prints full hearts
-            for (int i = 0; i < playerHealth; i++) {
-                System.out.print("[<3]");
-            }
-
-            // prints empty hearts
-            if (playerHealth < 3) {
-                for (int i = 0; i < 3 - playerHealth; i++) {
-                    System.out.print("[<>]");
-                }
-            }
-
-            // prints location of player and some of the user interface
-            System.out.print("[LOC:]");
-            System.out.println("[00" + playerX + ",00" + playerY + "]");
-            System.out.println("[+----- 1 2 3 4 5 6 7 8 9 -----+]");
-            System.out.print("[|                             |]");
-            System.out.println("");
-
-            // print mapSize rows
-            for (int y = lowY; y <= highY; y++) {
-
-                System.out.print("[" + y + "      ");
-                // print mapSize collums
-                for (int x = lowX; x <= highX; x++) {
-
-                    in = 0;
-                    stopState = false;
-                    while (stopState == false && in < cd[c[1]][c[0]].length) {
-                        // extracts map data
-                        bI = cd[c[1]][c[0]][in] / 100;
-                        bX = (cd[c[1]][c[0]][in] / 10 - (cd[c[1]][c[0]][in] / 100) * 10) + (c[0] * 9);
-                        bY = (cd[c[1]][c[0]][in] - cd[c[1]][c[0]][in] / 10 * 10) + (c[1] * 9);
-
-                        if (bX == x && bY == y) {
-                            stopState = true;
-                        } else {
-                            in++;
-                        }
-                    }
-
-                    // print block with corrosponding information
-                    if (bX == x && bY == y) {
-                        System.out.print(charColors[bI] + chars[bI] + " " + reset);
-                    } else if (playerX == x && playerY == y) {
-                        System.out.print(player + "P " + reset);
-                    } else {
-                        System.out.print("\u001B[32m" + "O " + reset);
-                    }
-                }
-                // increase row, reset collum and shift to next line
-                System.out.print("     " + y + "]");
-                System.out.println("");
-            }
-            // end of mapSize rows
-
-            System.out.println("[|                             |]");
-            System.out.println("[+----- 1 2 3 4 5 6 7 8 9 -----+]");
-
-            // prints toolbar and itembar
-            System.out.print("[TO:]" + "[" + tb[0] + "]" + "[" + tb[1] + "]" + "[" + tb[2] + "]" + "[ITE:]" + "[");
-            if (inv[0] < 10) {
-                System.out.print("0" + inv[invPos] + chars[invPos + 1]);
-            }
-            System.out.print("][");
-            if (inv[1] < 10) {
-                System.out.print("0" + inv[invPos + 1] + chars[invPos + 2] + "]");
-            }
-            System.out.println("");
-
-            // START OF CONTROLS
-            //
-            // record next instruction
-            instruction = input_String.nextLine();
-
-            // change location of player but stops player before it goes off the edge
-            if (instruction.equals("d")) {
-                // command to move player right
-                if (playerX < highX) {
-                    playerX++;
-                } else if (playerX == highX) {
-                    if (c[0] < 2) {
-                        c[0]++;
-                        playerX++;
-                    }
-                }
-            } else if (instruction.equals("a")) {
-                // command to move player left
-                if (playerX > lowX) {
-                    playerX--;
-                } else if (playerX == lowX) {
-                    if (c[0] > 0) {
-                        c[0]--;
-                        playerX--;
-                    }
-                }
-            } else if (instruction.equals("w")) {
-                // command to move player up
-                if (playerY > lowY) {
-                    playerY--;
-                } else if (playerY == lowY) {
-                    if (c[1] > 0) {
-                        c[1]--;
-                        playerY--;
-                    }
-                }
-            } else if (instruction.equals("s")) {
-                // command to move player down
-                if (playerY < highY) {
-                    playerY++;
-                } else if (playerY == highY) {
-                    if (c[1] < 2) {
-                        c[1]++;
-                        playerY++;
-                    }
-                }
-            } else if (instruction.equals("stop") || instruction.equals("exit")) {
-                run = false;
-            } else if (instruction.equals("m")) {
-                int offset = 0;
-                boolean stop = false;
-                System.out.println("Which direction? Type r or l only");
-                instruction = input_String.nextLine();
-                if (instruction.equals("l")) {
-                    offset = -1;
-                } else if (instruction.equals("r")) {
-                    offset = 1;
+    public static void printChunk(BlockData[][] map) {
+        for (int y = (((chunkY + 1) * 9) - 9); y <= (((chunkY + 1) * 9) - 1); y++) {
+            System.out.print("[|      ");
+            for (int x = (((chunkX + 1) * 9) - 9); x <= (((chunkX + 1) * 9) - 1); x++) {
+                if (map[y][x] != null) {
+                    System.out.print(charColors[map[y][x].id] + chars[map[y][x].id] + " " + reset);
+                } else if (y == playerY && x == playerX) {
+                    System.out.print(playerC + "P " + reset);
                 } else {
-                    System.out.println("This is not a valid input");
-                    stop = true;
+                    System.out.print("\u001B[32m" + "O " + reset);
                 }
-
-                while (stop == false) {
-                    // mine block to the right
-                    for (int index = 0; index < cd[c[1]][c[0]].length; index++) {
-                        // search through map data
-                        if (cd[c[1]][c[0]][index] - cd[c[1]][c[0]][index] / 100 * 100 == (playerX + offset) * 10 + playerY) {
-                            // found matching block to the right or left depending on offset
-
-                            // add the matching block to the inventory
-                            int type = cd[c[1]][c[0]][index] / 100 - 1;
-                            inv[type]++;
-
-                            // removes block from database
-                            // if data is at the top change it to zero
-                            for (int loop = 0; loop < cd[c[1]][c[0]].length; loop++) {
-                                if (index + loop < cd[c[1]][c[0]].length) {
-                                    cd[c[1]][c[0]][index] = cd[c[1]][c[0]][index + loop];
-                                } else {
-                                    cd[c[1]][c[0]][index] = 0;
-                                }
-                            }
-
-                            stop = true;
-                        }
-                    }
-                }
-            } else if (instruction.equals("er")) {
-                // use block to the right
-                int index = 0;
-                boolean stopConditon = false;
-                while (index < cd[c[1]][c[0]].length && stopConditon == false) {
-                    if (cd[c[1]][c[0]][index] - cd[c[1]][c[0]][index] / 100 * 100 == (playerX + 1) * 10 + playerY) {
-                        // if there is a block to the right
-                        if (cd[c[1]][c[0]][index] / 100 == 3) {
-                            //if block to the right is a crafting bench
-                            System.out.println("Type item to craft");
-                            String item = input_String.nextLine();
-                            if (item.equals("axe")) {
-                                if (inv[0] >= 2) {
-                                    tb[0] = "AX";
-                                    System.out.println("Axe Was Crafted.");
-                                    inv[0] = inv[0] - 2;
-                                    stopConditon = true;
-                                } else {
-                                    System.out.println("Not enough wood.");
-                                    stopConditon = true;
-                                }
-                            } else if (item.equals("dirt cake")) {
-                                if (inv[1] >= 1) {
-                                    playerHealth++;
-                                    System.out.println("A Dirt Cake Was Crafted and Consumed.");
-                                    inv[1] = inv[1] - 1;
-                                    stopConditon = true;
-                                } else {
-                                    System.out.println("Not enough dirt.");
-                                    stopConditon = true;
-                                }
-                            } else {
-                                System.out.println("Invalid Item Code.");
-                                stopConditon = true;
-                            }
-                        } else {
-                            System.out.println("Was not crafting bench");
-                            stopConditon = true;
-                        }
-                    }
-                    index++;
-                }
-            } else if (instruction.equals("e")) {
-                // incrase invPos by one if not at max scroll
-                if (invPos < inv.length - 2) {
-                    invPos++;
-                    System.out.println(invPos);
-                }
-            } else if (instruction.equals("q")) {
-                // decrease invPos by one if not at max scroll
-                if (invPos > 0) {
-                    invPos--;
-                }
-            } else if (instruction.equals("p")) {
-                // code to place block
-
-                int offset = 0;
-                boolean validInput = true;
-                System.out.println("Which direction? Type r or l only");
-                instruction = input_String.nextLine();
-                if (instruction.equals("l")) {
-                    offset = -1;
-                } else if (instruction.equals("r")) {
-                    offset = 1;
-                } else {
-                    System.out.println("This is not a valid input");
-                    validInput = false;
-                }
-
-                while (validInput) {
-                    System.out.println("Which block to place?");
-                    instruction = input_String.nextLine();
-                    if (instruction.equals("dirt")) {
-                        if (inv[1] >= 1) {
-                            // place block to the right
-                            // makes a copy of map data into newArr with an extra value at the end                
-                            int[] newArr = Arrays.copyOf(cd[c[1]][c[0]], cd[c[1]][c[0]].length + 1);
-                            cd[c[1]][c[0]] = newArr;
-                            cd[c[1]][c[0]][cd[c[1]][c[0]].length - 1] = 200 + (playerX + offset) * 10 + playerY * 1;
-                            inv[1]--;
-                            validInput = false;
-                        } else {
-                            System.out.println("Not enough dirt");
-                            validInput = false;
-                        }
-                    } else if (instruction.equals("ct")) {
-                        if (inv[2] >= 1) {
-                            // place block to the right
-                            // makes a copy of map data into newArr with an extra value at the end                
-                            int[] newArr = Arrays.copyOf(cd[c[1]][c[0]], cd[c[1]][c[0]].length + 1);
-                            cd[c[1]][c[0]] = newArr;
-                            cd[c[1]][c[0]][cd[c[1]][c[0]].length - 1] = 300 + (playerX + offset) * 10 + playerY * 1;
-                            inv[2]--;
-                            validInput = false;
-                        } else {
-                            System.out.println("Not enough crafting tables");
-                            validInput = false;
-                        }
-                    } else if (instruction.equals("wood")) {
-                        if (inv[0] >= 1) {
-                            // place block to the right
-                            // makes a copy of map data into newArr with an extra value at the end                
-                            int[] newArr = Arrays.copyOf(cd[c[1]][c[0]], cd[c[0]][c[1]].length + 1);
-                            cd[c[1]][c[0]] = newArr;
-                            cd[c[1]][c[0]][cd[c[1]][c[0]].length - 1] = 100 + (playerX + offset) * 10 + playerY * 1;
-                            inv[0]--;
-                            validInput = false;
-                        } else {
-                            System.out.println("Not enough wood");
-                            validInput = false;
-                        }
-                    }
-                }
-            } else {
-                // prints invalid command when command entered is invalid
-                System.out.println("Invalid Command");
             }
-
-            // clears console after every loop but doesn't work in netbeans for unknown reason
-            System.out.print("\033[H\033[2J");
-            System.out.flush();
-            // command to print current chunk data
-            // for (int i = 0; i < cd[c[1]][c[0]].length; i++) {
-            //     System.out.println(cd[c[1]][c[0]][i]);
-            // }
+            System.out.print("     |]");
+            System.out.println("");
         }
-        input_Int.close();
-        input_String.close();
+    }
+
+    public static void topUI() {
+        // prints health tag
+        System.out.print("[HEA:]");
+
+        // prints full hearts
+        for (int i = 0; i < playerHp; i++) {
+            System.out.print(health + "[<3]" + reset);
+        }
+
+        // prints empty hearts
+        if (playerHp < 3) {
+            for (int i = 0; i < 3 - playerHp; i++) {
+                System.out.print("[<>]");
+            }
+        }
+        System.out.println("[LOC:][00" + playerX + ",00" + playerY + "]");
+        System.out.println("[+----- 1 2 3 4 5 6 7 8 9 -----+]");
+        System.out.print("[|                             |]");
+        System.out.println("");
+    }
+
+    public static void bottomUI() {
+        System.out.println("[|                             |]");
+        System.out.println("[+----- 1 2 3 4 5 6 7 8 9 -----+]");
+        // prints toolbar and itembar
+        System.out.print("[TO:]" + "[" + tb[0] + "]" + "[" + tb[1] + "]" + "[" + tb[2] + "]" + "[ITE:]" + "[");
+        if (inv[0] < 10) {
+            System.out.print("0" + inv[invPos] + chars[invPos]);
+        }
+        System.out.print("][");
+        if (inv[1] < 10) {
+            System.out.print("0" + inv[invPos + 1] + chars[invPos + 1] + "]");
+        }
+        System.out.println("");
+    }
+
+    public static BlockData[][] genMap(int size) {
+
+        // up to 18 blocks per size / 3 ( up to 18 blocks per chunk)
+        Random randomAmountOfBlocks = new Random();
+        int lim = 18 * (int) Math.pow(size / 9, 2);
+        int rand = randomAmountOfBlocks.nextInt(lim);
+        for (int i = 0; i < rand; i++) {
+            // create a random x, y and id to place;
+            int x = randomInt(9 * size / 9);
+            int y = randomInt(9 * size / 9);
+            int id = randomInt(2);
+            int dur = 2;
+            // System.out.println(x + "" + y + "" + id);
+            // put block down using block data with those random numbers
+            map[y][x] = new BlockData(id, x, y, dur);
+        }
+
+        return map;
+    }
+
+    // general purpose methods
+    public static int randomInt(int n) {
+        Random random = new Random();
+        int rndInt = random.nextInt(n);
+        return rndInt;
+    }
+
+    public static int inputInt(String message) {
+        if (message != "") {
+            System.out.println(message);
+        }
+        int num = input.nextInt();
+        return num;
+    }
+
+    public static String inputString(String message) {
+        if (message != "") {
+            System.out.println(message);
+        }
+        String str = input.next();
+        return str;
     }
 }
