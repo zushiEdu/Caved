@@ -83,10 +83,10 @@ public class CavedMain {
         // TODO code application logic here
 
         map = genMap(size);
+        printMap(map);
         while (run) {
             topUI();
             printChunk(map);
-            //printMap(map);
             bottomUI();
             userInput();
 
@@ -301,7 +301,6 @@ public class CavedMain {
     // map and user interface methods
     public static void printMap(BlockData[][] map) {
         for (int y = 0; y < map.length; y++) {
-            System.out.print("[|      ");
             for (int x = 0; x < map[y].length; x++) {
                 if (map[y][x] != null) {
                     System.out.print(charColors[map[y][x].id] + chars[map[y][x].id] + " " + reset);
@@ -311,7 +310,6 @@ public class CavedMain {
                     System.out.print("\u001B[32m" + "O " + reset);
                 }
             }
-            System.out.print("     |]");
             System.out.println("");
         }
     }
