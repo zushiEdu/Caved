@@ -48,14 +48,23 @@ public class CavedMain {
         
         ### KNOWN BUGS ####
      */
+    // BLACK "\033[0;30m"
+    // RED "\033[0;31m"
+    // GREEN "\033[0;32m"
+    // YELLOW "\033[0;33m"
+    // BLUE "\033[0;34m"
+    // PURPLE "\033[0;35m"
+    // CYAN "\033[0;36m"
+    // WHITE "\033[0;37m"
     /**
      * @param args the command line arguments
      */
     static Scanner input = new Scanner(System.in);
 
     // map related variables
-    static String[] chars = {"W", "D", "C"};
-    static String[] charColors = {"\u001B[33m", "\u001B[33m", "\u001B[34m"};
+    static String[] chars = {"W", "D", "C", "V", "S", "#"};
+    static String[] charColors = {"\u001B[33m", "\u001B[33m", "\u001B[34m", "\u001B[37m", "\u001B[37m", "\u001B[30m"};
+    static Boolean[] breakable = {true, true, true, false, true, false};
     static String reset = "\u001B[0m";
     static String playerC = "\u001B[36m";
     static String health = "\u001B[31m";
@@ -70,7 +79,7 @@ public class CavedMain {
     static int playerHp = 3;
     // inventory player related variables
     static String[] tb = {"  ", "  ", "  "};
-    static int[] inv = {0, 0, 0};
+    static int[] inv = {0, 0, 0, 0, 0, 0};
     static int invPos = 0;
 
     // general game variables
@@ -176,16 +185,16 @@ public class CavedMain {
 
         // crafting
         if (instruction.charAt(0) == 'E') {
-            char secondChar = instruction.charAt(1);
-            if (secondChar == 'U') {
+            String subString = instruction.substring(1);
+            if (subString.equals("U")) {
                 craft(0, -1);
-            } else if (secondChar == 'R') {
+            } else if (subString.equals("R")) {
                 craft(1, 0);
-            } else if (secondChar == 'D') {
+            } else if (subString.equals("D")) {
                 craft(0, 1);
-            } else if (secondChar == 'L') {
+            } else if (subString.equals("L")) {
                 craft(-1, 0);
-            } else if (secondChar == 'I') {
+            } else if (subString.equals("I")) {
                 if (inv[0] >= 4) {
                     inv[2]++;
                     System.out.println("Crafting bench crafted");
@@ -251,10 +260,14 @@ public class CavedMain {
     public static void mineBlock(int x, int y) {
         // if block to the offset exists mine it
         if (checkBlock(playerX + x, playerY + y)) {
-            // add block id to the right to inventory
-            inv[map[playerY + y][playerX + x].id]++;
-            // set id of block to the right to null
-            map[playerY + y][playerX + x] = null;
+            if (breakable[map[playerY + y][playerX + x].id]) {
+                // add block id to the right to inventory
+                inv[map[playerY + y][playerX + x].id]++;
+                // set id of block to the right to null
+                map[playerY + y][playerX + x] = null;
+            } else {
+                System.out.println("This block is not breakable.");
+            }
         }
     }
 
@@ -370,27 +383,32 @@ public class CavedMain {
     public static BlockData[][] genMap(int size) {
 
         // up to 18 blocks per size / 3 ( up to 18 blocks per chunk)
-        Random randomAmountOfBlocks = new Random();
         int lim = 18 * (int) Math.pow(size / 9, 2);
-        int rand = randomAmountOfBlocks.nextInt(lim);
+        int rand = randomInt(lim);
         for (int i = 0; i < rand; i++) {
             // create a random x, y and id to place;
             int x = randomInt(9 * size / 9);
             int y = randomInt(9 * size / 9);
-            int id = randomInt(2);
+            int id = randomInt(81);
+            int idmod;
+            if (id % 17 == 0) {
+                idmod = 3;
+            } else {
+                idmod = randomInt(2);
+            }
             int dur = 2;
             // System.out.println(x + "" + y + "" + id);
             // put block down using block data with those random numbers
-            map[y][x] = new BlockData(id, x, y, dur);
+            map[y][x] = new BlockData(idmod, x, y, dur);
         }
 
         return map;
     }
 
     // general purpose methods
-    public static int randomInt(int n) {
+    public static int randomInt(int num) {
         Random random = new Random();
-        int rndInt = random.nextInt(n);
+        int rndInt = random.nextInt(num);
         return rndInt;
     }
 
