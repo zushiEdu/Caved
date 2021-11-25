@@ -90,7 +90,7 @@ public class CavedMain {
 
     public static void main(String[] args) {
         map = genMap(size);
-        printMap(map);
+        // printMap(map);
         while (run) {
             topUI();
             printChunk(map);
