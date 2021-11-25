@@ -62,21 +62,16 @@ public class CavedMainOld {
         int playerHealth = 1;
 
         // sets character and map data
-        String[] chars = {"", "W", "D", "C"};
-        String[] charColors = {"", "\u001B[33m", "\u001B[33m", "\u001B[34m"};
+        String[] chars = { "", "W", "D", "C" };
+        String[] charColors = { "", "\u001B[33m", "\u001B[33m", "\u001B[34m" };
 
         String reset = "\u001B[0m";
         String player = "\u001B[34m";
 
         // new map data \/
-        int[][][] cd
-                = {
-                    {{188, 233, 243, 184, 182, 355, 295}, {121, 131}, {0}},
-                    {{111, 121}, {0}, {0}},
-                    {{0}, {0}, {0}}
-                };
+        int[][][] cd = { { { 188, 233, 243, 184, 182, 355, 295 }, { 121, 131 }, { 0 } }, { { 111, 121 }, { 0 }, { 0 } },
+                { { 0 }, { 0 }, { 0 } } };
 
-        // TODO integrate new map system
         BlockData chunks[][][] = new BlockData[3][3][81];
 
         // whole map gen should go in BlockData
@@ -87,15 +82,15 @@ public class CavedMainOld {
         // r = row c[1]
         // c = collum c[0]
         // b = block i
-        int[] c = {0, 0};
+        int[] c = { 0, 0 };
 
         int lowX;
         int lowY;
         int highX;
         int highY;
 
-        String[] tb = {"  ", "  ", "  "};
-        int[] inv = {0, 0, 0};
+        String[] tb = { "  ", "  ", "  " };
+        int[] inv = { 0, 0, 0 };
 
         int invPos = 0;
 
@@ -326,7 +321,8 @@ public class CavedMainOld {
                     // mine block to the right
                     for (int index = 0; index < cd[c[1]][c[0]].length; index++) {
                         // search through map data
-                        if (cd[c[1]][c[0]][index] - cd[c[1]][c[0]][index] / 100 * 100 == (playerX + offset) * 10 + playerY) {
+                        if (cd[c[1]][c[0]][index] - cd[c[1]][c[0]][index] / 100 * 100 == (playerX + offset) * 10
+                                + playerY) {
                             // found matching block to the right or left depending on offset
 
                             // add the matching block to the inventory

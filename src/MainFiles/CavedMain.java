@@ -14,7 +14,7 @@ import java.util.Scanner;
  */
 public class CavedMain {
 
-    /* TODO
+    /*
         Make tools do something
             - turn block data into an array of values [durability, type, x, y]
                 - this not only benifits not having to retrofit all code with this new data type but also makes for future expansion easier
@@ -62,9 +62,9 @@ public class CavedMain {
     static Scanner input = new Scanner(System.in);
 
     // map related variables
-    static String[] chars = {"W", "D", "C", "V", "S", "#"};
-    static String[] charColors = {"\u001B[33m", "\u001B[33m", "\u001B[34m", "\u001B[37m", "\u001B[37m", "\u001B[30m"};
-    static Boolean[] breakable = {true, true, true, false, true, false};
+    static String[] chars = { "W", "D", "C", "V", "S", "#" };
+    static String[] charColors = { "\u001B[33m", "\u001B[33m", "\u001B[34m", "\u001B[37m", "\u001B[37m", "\u001B[30m" };
+    static Boolean[] breakable = { true, true, true, false, true, false };
     static String reset = "\u001B[0m";
     static String playerC = "\u001B[36m";
     static String health = "\u001B[31m";
@@ -78,8 +78,8 @@ public class CavedMain {
 
     static int playerHp = 3;
     // inventory player related variables
-    static String[] tb = {"  ", "  ", "  "};
-    static int[] inv = {0, 0, 0, 0, 0, 0};
+    static String[] tb = { "  ", "  ", "  " };
+    static int[] inv = { 0, 0, 0, 0, 0, 0 };
     static int invPos = 0;
 
     // general game variables
@@ -89,8 +89,6 @@ public class CavedMain {
     static BlockData map[][] = new BlockData[size][size];
 
     public static void main(String[] args) {
-        // TODO code application logic here
-
         map = genMap(size);
         printMap(map);
         while (run) {
@@ -115,7 +113,7 @@ public class CavedMain {
         To add an if statement put this sequence after the last condition
         
          if (instruction.equals("")) {
-
+        
         } else
         
          */
