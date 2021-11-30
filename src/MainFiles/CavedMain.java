@@ -8,6 +8,8 @@ package MainFiles;
 import java.util.Random;
 import java.util.Scanner;
 
+import javax.sound.sampled.SourceDataLine;
+
 /**
  *
  * @author Ethan
@@ -56,6 +58,8 @@ public class CavedMain {
     // PURPLE "\033[0;35m"
     // CYAN "\033[0;36m"
     // WHITE "\033[0;37m"
+
+    // For background use 4 infront of color id instead of 3
     /**
      * @param args the command line arguments
      */
@@ -88,8 +92,11 @@ public class CavedMain {
     static int size = inputInt("Enter desired size of map to generate in multiples of 9");
     static BlockData map[][] = new BlockData[size][size];
 
+    static BlockData caves[][][] = new BlockData[(int) Math.pow(size, 2)][9][9];
+
     public static void main(String[] args) {
         map = genMap(size);
+        caves = genCaves(size);
         // printMap(map);
         while (run) {
             topUI();
@@ -97,8 +104,8 @@ public class CavedMain {
             bottomUI();
             userInput();
 
-            System.out.print("\033[H\033[2J");
-            System.out.flush();
+            // System.out.print("\033[H\033[2J");
+            // System.out.flush();
         }
         input.close();
     }
@@ -310,6 +317,8 @@ public class CavedMain {
     }
 
     // map and user interface methods
+
+    // print whole map
     public static void printMap(BlockData[][] map) {
         for (int y = 0; y < map.length; y++) {
             for (int x = 0; x < map[y].length; x++) {
@@ -325,6 +334,7 @@ public class CavedMain {
         }
     }
 
+    // print current chunk
     public static void printChunk(BlockData[][] map) {
         for (int y = (((chunkY + 1) * 9) - 9); y <= (((chunkY + 1) * 9) - 1); y++) {
             System.out.print("[|      ");
@@ -334,7 +344,7 @@ public class CavedMain {
                 } else if (y == playerY && x == playerX) {
                     System.out.print(playerC + "P " + reset);
                 } else {
-                    System.out.print("\u001B[32m" + "O " + reset);
+                    System.out.print("\u001B[41m" + "  " + reset);
                 }
             }
             System.out.print("     |]");
@@ -342,12 +352,13 @@ public class CavedMain {
         }
     }
 
+    // print top section of user interface
     public static void topUI() {
         // prints health tag
         System.out.print("[HEA:]");
 
         // prints full hearts
-        for (int i = 0; i < playerHp; i++) {
+        for (int i = 0; i < playerHp && i < 3; i++) {
             System.out.print(health + "[<3]" + reset);
         }
 
@@ -363,6 +374,7 @@ public class CavedMain {
         System.out.println("");
     }
 
+    // print botton section of user interface
     public static void bottomUI() {
         System.out.println("[|                             |]");
         System.out.println("[+----- 1 2 3 4 5 6 7 8 9 -----+]");
@@ -378,6 +390,7 @@ public class CavedMain {
         System.out.println("");
     }
 
+    // generate the map
     public static BlockData[][] genMap(int size) {
 
         // up to 18 blocks per size / 3 ( up to 18 blocks per chunk)
@@ -403,13 +416,25 @@ public class CavedMain {
         return map;
     }
 
+    // generate the caves
+    public static BlockData[][][] genCaves(int size) {
+        int caveAmt = (int) Math.pow(size, 2);
+        for (int i = 0; i < caveAmt; i++) {
+
+        }
+        return caves;
+    }
+
     // general purpose methods
+
+    // get a random int 
     public static int randomInt(int num) {
         Random random = new Random();
         int rndInt = random.nextInt(num);
         return rndInt;
     }
 
+    // input a message, get back an int
     public static int inputInt(String message) {
         if (message != "") {
             System.out.println(message);
@@ -418,6 +443,7 @@ public class CavedMain {
         return num;
     }
 
+    // input a message, get back a string
     public static String inputString(String message) {
         if (message != "") {
             System.out.println(message);
