@@ -98,6 +98,9 @@ public class CavedMain {
     static int chunkX = 0;
     static int chunkY = 0;
 
+    static int tempChunkX;
+    static int tempChunkY;
+
     // general player related variables
     static int playerX = 0;
     static int playerY = 0;
@@ -151,14 +154,26 @@ public class CavedMain {
         
          */
         // movement
-        if (instruction.equals("W")) {
-            move(0, -1);
-        } else if (instruction.equals("A")) {
-            move(-1, 0);
-        } else if (instruction.equals("S")) {
-            move(0, 1);
-        } else if (instruction.equals("D")) {
-            move(1, 0);
+        if (inCave) {
+            if (instruction.equals("W")) {
+                move(0, -1, 1);
+            } else if (instruction.equals("A")) {
+                move(-1, 0, 1);
+            } else if (instruction.equals("S")) {
+                move(0, 1, 1);
+            } else if (instruction.equals("D")) {
+                move(1, 0, 1);
+            }
+        } else {
+            if (instruction.equals("W")) {
+                move(0, -1, 0);
+            } else if (instruction.equals("A")) {
+                move(-1, 0, 0);
+            } else if (instruction.equals("S")) {
+                move(0, 1, 0);
+            } else if (instruction.equals("D")) {
+                move(1, 0, 0);
+            }
         }
 
         // mining
@@ -201,6 +216,8 @@ public class CavedMain {
             inCave = false;
             playerX = enterX;
             playerY = enterY;
+            chunkX = tempChunkX;
+            chunkY = tempChunkY;
         }
 
         // map print
@@ -281,6 +298,8 @@ public class CavedMain {
                     System.out.println(item);
                 }
             } else if (map[playerY + y][playerX + x].id == 3) {
+                tempChunkX = chunkX;
+                tempChunkY = chunkY;
                 enterX = playerX;
                 enterY = playerY;
                 caveIn = map[playerY + y][playerX + x].num;
@@ -334,34 +353,48 @@ public class CavedMain {
     }
 
     // user input methods
-    public static void move(int x, int y) {
-        int highX = (chunkX + 1) * 9;
-        int lowX = (chunkX + 1) * 9 - 9;
+    public static void move(int x, int y, int borderOffset) {
+        // subtract offset to high values
+        // add offset to low values
 
-        int highY = (chunkY + 1) * 9;
-        int lowY = (chunkY + 1) * 9 - 9;
+        if (inCave) {
+            chunkX = 0;
+            chunkY = 0;
+        }
+        int highX = (chunkX + 1) * 9 - 1 - borderOffset;
+        int lowX = (chunkX + 1) * 9 - 9 + borderOffset;
 
-        if (playerX + x >= lowX && playerX + x < highX) {
+        int highY = (chunkY + 1) * 9 - 1 - borderOffset;
+        int lowY = (chunkY + 1) * 9 - 9 + borderOffset;
+
+        // System.out.println(highX + " " + lowX);
+        // System.out.println(highY + " " + lowY);
+
+        if (playerX + x >= lowX && playerX + x <= highX) {
             // if within bounds of chunk move normally
             playerX = playerX + x;
-        } else if (playerX == lowX || playerX == highX - 1) {
-            // if at edge of chunk check if not at edge of map
-            // if not at map offset chunk and player
-            if (chunkX + x >= 0 && chunkX + x <= (size / 9) - 1) {
-                chunkX = chunkX + x;
-                playerX = playerX + x;
+        } else if (!inCave) {
+            if (playerX == lowX || playerX == highX) {
+                // if at edge of chunk check if not at edge of map
+                // if not at map offset chunk and player
+                if (chunkX + x >= 0 && chunkX + x <= (size / 9) - 1) {
+                    chunkX = chunkX + x;
+                    playerX = playerX + x;
+                }
             }
         }
 
-        if (playerY + y < highY && playerY + y >= lowY) {
+        if (playerY + y <= highY && playerY + y >= lowY) {
             // if within bounds of chunk move normally
             playerY = playerY + y;
-        } else if (playerY == lowY || playerY == highY - 1) {
-            // if at edge of chunk check if not at edge of map
-            // if not at map offset chunk and player
-            if (chunkY + y <= (size / 9) - 1 && chunkY + y >= 0) {
-                chunkY = chunkY + y;
-                playerY = playerY + y;
+        } else if (!inCave) {
+            if (playerY == lowY || playerY == highY) {
+                // if at edge of chunk check if not at edge of map
+                // if not at map offset chunk and player
+                if (chunkY + y <= (size / 9) - 1 && chunkY + y >= 0) {
+                    chunkY = chunkY + y;
+                    playerY = playerY + y;
+                }
             }
         }
     }
