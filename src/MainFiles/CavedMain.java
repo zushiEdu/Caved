@@ -74,6 +74,8 @@ public class CavedMain {
     static String playerC = "\u001B[36m";
     static String health = "\u001B[31m";
 
+    static Random random = new Random();
+
     static BlockData bound = new BlockData(5, 0, 0, 1, amount[5]++);
 
     static BlockData[][] caveTemplate = {
@@ -88,7 +90,10 @@ public class CavedMain {
             { bound, bound, bound, bound, bound, bound, bound, bound, bound }
     };
 
-    static boolean inCave = false;
+    static boolean inCave = true;
+    static int enterX = 4;
+    static int enterY = 4;
+    static int caveIn = 0;
 
     static int chunkX = 0;
     static int chunkY = 0;
@@ -117,7 +122,11 @@ public class CavedMain {
         printMap(map);
         while (run) {
             topUI();
-            printChunk(map);
+            if (inCave) {
+                printChunk(caves[caveIn], "\u001B[37m", 0, 0);
+            } else {
+                printChunk(map, "\u001B[32m", chunkX, chunkY);
+            }
             bottomUI();
             userInput();
 
@@ -189,8 +198,9 @@ public class CavedMain {
 
         // exit cave
         if (instruction.equals("R") && inCave) {
-            // teleport to map
-            // set inCave to false
+            inCave = false;
+            playerX = enterX;
+            playerY = enterY;
         }
 
         // map print
@@ -221,17 +231,17 @@ public class CavedMain {
             }
         }
 
-        // crafting
+        // interacting / crafting
         if (instruction.charAt(0) == 'E') {
             String subString = instruction.substring(1);
             if (subString.equals("U")) {
-                craft(0, -1);
+                interact(0, -1);
             } else if (subString.equals("R")) {
-                craft(1, 0);
+                interact(1, 0);
             } else if (subString.equals("D")) {
-                craft(0, 1);
+                interact(0, 1);
             } else if (subString.equals("L")) {
-                craft(-1, 0);
+                interact(-1, 0);
             } else if (subString.equals("I")) {
                 if (inv[0] >= 4) {
                     inv[2]++;
@@ -243,7 +253,7 @@ public class CavedMain {
         }
     }
 
-    public static void craft(int x, int y) {
+    public static void interact(int x, int y) {
         if (map[playerY + y][playerX + x] != null) {
             if (map[playerY + y][playerX + x].id == 2) {
                 // the item to the offset space is a crafting bench
@@ -270,9 +280,16 @@ public class CavedMain {
                 } else {
                     System.out.println(item);
                 }
+            } else if (map[playerY + y][playerX + x].id == 3) {
+                enterX = playerX;
+                enterY = playerY;
+                caveIn = map[playerY + y][playerX + x].num;
+                inCave = true;
+                playerX = 4;
+                playerY = 4;
             }
         } else {
-            System.out.println("No crafting table here");
+            System.out.println("No interactable here");
         }
     }
 
@@ -368,16 +385,16 @@ public class CavedMain {
     }
 
     // print current chunk
-    public static void printChunk(BlockData[][] map) {
+    public static void printChunk(BlockData[][] chunk, String backgroundColor, int chunkX, int chunkY) {
         for (int y = (((chunkY + 1) * 9) - 9); y <= (((chunkY + 1) * 9) - 1); y++) {
             System.out.print("[|      ");
             for (int x = (((chunkX + 1) * 9) - 9); x <= (((chunkX + 1) * 9) - 1); x++) {
-                if (map[y][x] != null) {
-                    System.out.print(charColors[map[y][x].id] + chars[map[y][x].id] + " " + reset);
+                if (chunk[y][x] != null) {
+                    System.out.print(charColors[chunk[y][x].id] + chars[chunk[y][x].id] + " " + reset);
                 } else if (y == playerY && x == playerX) {
                     System.out.print(playerC + "P " + reset);
                 } else {
-                    System.out.print("\u001B[32m" + "O " + reset);
+                    System.out.print(backgroundColor + "O " + reset);
                 }
             }
             System.out.print("     |]");
@@ -458,31 +475,18 @@ public class CavedMain {
 
     // generate the caves
     public static BlockData[][][] genCaves(BlockData[][][] caves) {
-        for (int n = 0; n < amount[3]; n++) {
+        for (int n = 0; n < caves.length; n++) {
             // for each cave apply the template
             caves[n] = caveTemplate;
-            // create a random number from 0 to 9
 
+            /*
             int rand = randomInt(0, 9);
-            // create a rand amount of stone
             for (int i = 0; i < rand; i++) {
-                int x = randomInt(1, 8);
                 int y = randomInt(1, 8);
-                System.out.print(x + "," + y);
-                if (x != 4 && y != 4) {
-                    caves[n][y][x] = new BlockData(4, x, y, 3, amount[4]++);
-
-                    System.out.print(" " + caves[n][y][x].id);
-
-                }
-                System.out.println();
+                int x = randomInt(1, 8);
+                caves[n][y][x] = new BlockData(4, x, y, 3, amount[4]++);
             }
-            System.out.println();
-        }
-
-        // print all caves
-        ///*
-        for (int n = 0; n < amount[3]; n++) {
+            
             for (int y = 0; y < caves[n].length; y++) {
                 for (int x = 0; x < caves[n][y].length; x++) {
                     if (caves[n][y][x] != null) {
@@ -494,8 +498,9 @@ public class CavedMain {
                 }
                 System.out.println("");
             }
+            */
         }
-        //*/
+
         return caves;
     }
 
@@ -503,7 +508,6 @@ public class CavedMain {
 
     // get a random int 
     public static int randomInt(int min, int max) {
-        Random random = new Random();
         int rndInt = (random.nextInt((max - min))) + min;
         return rndInt;
     }
