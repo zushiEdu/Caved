@@ -90,9 +90,9 @@ public class CavedMain {
             { bound, bound, bound, bound, bound, bound, bound, bound, bound }
     };
 
-    static boolean inCave = true;
-    static int enterX = 4;
-    static int enterY = 4;
+    static boolean inCave;
+    static int enterX;
+    static int enterY;
     static int caveIn = 0;
 
     static int chunkX = 0;
