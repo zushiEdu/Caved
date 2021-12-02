@@ -37,9 +37,7 @@ public class CavedMain {
             - save to save to to file located in documents with name specified
             - load to load that file located in documents with name specified
         Caves
-            - have box with inpenetrable shell around that cant be broken appear on screen with exit in middle
             - caves will include stone that is mineable and ores
-            - cave data will be stored in a seperate data set
             - caves may include enemies
         Player only door
             - item in which only a player can pass through acting as an automatic door
@@ -73,8 +71,6 @@ public class CavedMain {
     static String reset = "\u001B[0m";
     static String playerC = "\u001B[36m";
     static String health = "\u001B[31m";
-
-    static Random random = new Random();
 
     static BlockData bound = new BlockData(5, 0, 0, 1, amount[5]++);
 
@@ -419,6 +415,7 @@ public class CavedMain {
 
     // print current chunk
     public static void printChunk(BlockData[][] chunk, String backgroundColor, int chunkX, int chunkY) {
+        System.out.println(caveIn);
         for (int y = (((chunkY + 1) * 9) - 9); y <= (((chunkY + 1) * 9) - 1); y++) {
             System.out.print("[|      ");
             for (int x = (((chunkX + 1) * 9) - 9); x <= (((chunkX + 1) * 9) - 1); x++) {
@@ -500,47 +497,35 @@ public class CavedMain {
             int dur = 2;
             // System.out.println(x + "" + y + "" + id);
             // put block down using block data with those random numbers
-            map[y][x] = new BlockData(id, x, y, dur, amount[id]++);
+            if (map[y][x] == null) {
+                map[y][x] = new BlockData(id, x, y, dur, amount[id]++);
+            }
         }
 
         return map;
     }
 
     // generate the caves
-    public static BlockData[][][] genCaves(BlockData[][][] caves) {
-        for (int n = 0; n < caves.length; n++) {
+    public static BlockData[][][] genCaves(BlockData[][][] cave) {
+        for (int n = 0; n < amount[3]; n++) {
             // for each cave apply the template
-            caves[n] = caveTemplate;
+            cave[n] = caveTemplate;
 
             /*
-            int rand = randomInt(0, 9);
-            for (int i = 0; i < rand; i++) {
-                int y = randomInt(1, 8);
-                int x = randomInt(1, 8);
-                caves[n][y][x] = new BlockData(4, x, y, 3, amount[4]++);
-            }
-            
-            for (int y = 0; y < caves[n].length; y++) {
-                for (int x = 0; x < caves[n][y].length; x++) {
-                    if (caves[n][y][x] != null) {
-                        int id = caves[n][y][x].id;
-                        System.out.print(charColors[id] + chars[id] + " " + reset);
-                    } else {
-                        System.out.print("  ");
-                    }
-                }
-                System.out.println("");
-            }
+            int x = randomInt(1, 8);
+            int y = randomInt(1, 8);
+            cave[n][y][x] = new BlockData(4, x, y, 5, amount[4]++);
             */
         }
 
-        return caves;
+        return cave;
     }
 
     // general purpose methods
 
     // get a random int 
     public static int randomInt(int min, int max) {
+        Random random = new Random();
         int rndInt = (random.nextInt((max - min))) + min;
         return rndInt;
     }
