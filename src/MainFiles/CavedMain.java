@@ -57,6 +57,8 @@ public class CavedMain {
     // CYAN "\033[0;36m"
     // WHITE "\033[0;37m"
 
+    // TODO Add JColor for combined highlighting and foregrounding
+
     // For background use 4 infront of color id instead of 3
     /**
      * @param args the command line arguments
@@ -65,11 +67,28 @@ public class CavedMain {
 
     // map related variables
     static String[] chars = { "W", "D", "C", "V", "S", "#" };
+    static int[] amount = { 0, 0, 0, 0, 0, 0 };
     static String[] charColors = { "\u001B[33m", "\u001B[33m", "\u001B[34m", "\u001B[37m", "\u001B[37m", "\u001B[30m" };
     static Boolean[] breakable = { true, true, true, false, true, false };
     static String reset = "\u001B[0m";
     static String playerC = "\u001B[36m";
     static String health = "\u001B[31m";
+
+    static BlockData bound = new BlockData(5, 0, 0, 1, amount[5]++);
+
+    static BlockData[][] caveTemplate = {
+            { bound, bound, bound, bound, bound, bound, bound, bound, bound },
+            { bound, null, null, null, null, null, null, null, bound },
+            { bound, null, null, null, null, null, null, null, bound },
+            { bound, null, null, null, null, null, null, null, bound },
+            { bound, null, null, null, null, null, null, null, bound },
+            { bound, null, null, null, null, null, null, null, bound },
+            { bound, null, null, null, null, null, null, null, bound },
+            { bound, null, null, null, null, null, null, null, bound },
+            { bound, bound, bound, bound, bound, bound, bound, bound, bound }
+    };
+
+    static boolean inCave = false;
 
     static int chunkX = 0;
     static int chunkY = 0;
@@ -88,14 +107,14 @@ public class CavedMain {
     static boolean run = true;
 
     static int size = inputInt("Enter desired size of map to generate in multiples of 9");
-    static BlockData map[][] = new BlockData[size][size];
-
-    static BlockData caves[][][] = new BlockData[(int) Math.pow(size, 2)][9][9];
+    static BlockData[][] map = new BlockData[size][size];
 
     public static void main(String[] args) {
         map = genMap(size);
-        caves = genCaves(size);
-        // printMap(map);
+        BlockData[][][] caves = new BlockData[amount[3]][9][9];
+        System.out.println(amount[3]);
+        caves = genCaves(caves);
+        printMap(map);
         while (run) {
             topUI();
             printChunk(map);
@@ -166,6 +185,22 @@ public class CavedMain {
             for (int i = 0; i < inv.length; i++) {
                 System.out.println(inv[i] + "" + chars[i] + " ");
             }
+        }
+
+        // exit cave
+        if (instruction.equals("R") && inCave) {
+            // teleport to map
+            // set inCave to false
+        }
+
+        // map print
+        if (instruction.equals("MAP")) {
+            printMap(map);
+        }
+
+        // print amount of every type
+        if (instruction.equals("SUM")) {
+            printAmount();
         }
 
         // game force quit
@@ -253,7 +288,7 @@ public class CavedMain {
             if (inv[block] > 0) {
                 // remove block
                 inv[block]--;
-                map[playerY + y][playerX + x] = new BlockData(block, playerX + x, playerY + y, 2);
+                map[playerY + y][playerX + x] = new BlockData(block, playerX + x, playerY + y, 2, amount[block]++);
             } else {
                 System.out.println("Not enough blocks of that type");
             }
@@ -342,7 +377,7 @@ public class CavedMain {
                 } else if (y == playerY && x == playerX) {
                     System.out.print(playerC + "P " + reset);
                 } else {
-                    System.out.print("\u001B[41m" + "  " + reset);
+                    System.out.print("\u001B[32m" + "O " + reset);
                 }
             }
             System.out.print("     |]");
@@ -357,7 +392,7 @@ public class CavedMain {
 
         // prints full hearts
         for (int i = 0; i < playerHp && i < 3; i++) {
-            System.out.print(health + "[<3]" + reset);
+            System.out.print("[" + health + "<3" + reset + "]");
         }
 
         // prints empty hearts
@@ -388,47 +423,88 @@ public class CavedMain {
         System.out.println("");
     }
 
+    // print map distribution
+    public static void printAmount() {
+        for (int i = 0; i < amount.length; i++) {
+            System.out.print(amount[i] + ", ");
+        }
+        System.out.println();
+    }
+
     // generate the map
     public static BlockData[][] genMap(int size) {
 
         // up to 18 blocks per size / 3 ( up to 18 blocks per chunk)
         int lim = 18 * (int) Math.pow(size / 9, 2);
-        int rand = randomInt(lim);
+        int rand = randomInt(0, lim);
         for (int i = 0; i < rand; i++) {
             // create a random x, y and id to place;
-            int x = randomInt(9 * size / 9);
-            int y = randomInt(9 * size / 9);
-            int id = randomInt(81);
-            int idmod;
+            int x = randomInt(0, 9 * size / 9);
+            int y = randomInt(0, 9 * size / 9);
+            int id = randomInt(0, 81);
             if (id % 17 == 0) {
-                idmod = 3;
+                id = 3;
             } else {
-                idmod = randomInt(2);
+                id = randomInt(0, 2);
             }
             int dur = 2;
             // System.out.println(x + "" + y + "" + id);
             // put block down using block data with those random numbers
-            map[y][x] = new BlockData(idmod, x, y, dur);
+            map[y][x] = new BlockData(id, x, y, dur, amount[id]++);
         }
 
         return map;
     }
 
     // generate the caves
-    public static BlockData[][][] genCaves(int size) {
-        int caveAmt = (int) Math.pow(size, 2);
-        for (int i = 0; i < caveAmt; i++) {
+    public static BlockData[][][] genCaves(BlockData[][][] caves) {
+        for (int n = 0; n < amount[3]; n++) {
+            // for each cave apply the template
+            caves[n] = caveTemplate;
+            // create a random number from 0 to 9
 
+            int rand = randomInt(0, 9);
+            // create a rand amount of stone
+            for (int i = 0; i < rand; i++) {
+                int x = randomInt(1, 8);
+                int y = randomInt(1, 8);
+                System.out.print(x + "," + y);
+                if (x != 4 && y != 4) {
+                    caves[n][y][x] = new BlockData(4, x, y, 3, amount[4]++);
+
+                    System.out.print(" " + caves[n][y][x].id);
+
+                }
+                System.out.println();
+            }
+            System.out.println();
         }
+
+        // print all caves
+        ///*
+        for (int n = 0; n < amount[3]; n++) {
+            for (int y = 0; y < caves[n].length; y++) {
+                for (int x = 0; x < caves[n][y].length; x++) {
+                    if (caves[n][y][x] != null) {
+                        int id = caves[n][y][x].id;
+                        System.out.print(charColors[id] + chars[id] + " " + reset);
+                    } else {
+                        System.out.print("  ");
+                    }
+                }
+                System.out.println("");
+            }
+        }
+        //*/
         return caves;
     }
 
     // general purpose methods
 
     // get a random int 
-    public static int randomInt(int num) {
+    public static int randomInt(int min, int max) {
         Random random = new Random();
-        int rndInt = random.nextInt(num);
+        int rndInt = (random.nextInt((max - min))) + min;
         return rndInt;
     }
 

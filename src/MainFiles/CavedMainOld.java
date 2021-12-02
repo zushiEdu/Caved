@@ -128,15 +128,15 @@ public class CavedMainOld {
                     int chance = (int) Math.floor(Math.random() * 100);
                     if (chance % 9 == 0) {
                         // dirt
-                        chunks[y][x][i] = new BlockData(1, randX, randY, dur);
+                        chunks[y][x][i] = new BlockData(1, randX, randY, dur, 0);
                         i++;
                     } else if (chance % 7 == 0) {
                         // wood
-                        chunks[y][x][i] = new BlockData(2, randX, randY, dur);
+                        chunks[y][x][i] = new BlockData(2, randX, randY, dur, 0);
                         i++;
                     } else if (chance % 12 == 0) {
                         // crafting table
-                        chunks[y][x][i] = new BlockData(3, randY, randY, dur);
+                        chunks[y][x][i] = new BlockData(3, randY, randY, dur, 0);
                         i++;
                     }
                 }
