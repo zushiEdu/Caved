@@ -127,15 +127,33 @@ public class CavedMain {
                 printChunk(map, "\u001B[32m", chunkX, chunkY);
             }
             bottomUI();
-            userInput();
+            if (inCave) {
+                caves[caveIn] = userInput(caves[caveIn]);
+            } else {
+                map = userInput(map);
+            }
 
             // System.out.print("\033[H\033[2J");
             // System.out.flush();
+
+            /*
+            for (int i = 0; i < caves.length; i++) {
+                for (int j = 0; j < caves[i].length; j++) {
+                    for (int k = 0; k < caves[i][j].length; k++) {
+                        System.out.println(caves[i][j][k]);
+                    }
+                }
+            }
+            
+            for (int i = 0; i < map.length; i++) {
+                System.out.println(map[i]);
+            }
+            */
         }
         input.close();
     }
 
-    public static void userInput() {
+    public static BlockData[][] userInput(BlockData[][] map) {
         String instruction;
         instruction = inputString("");
         instruction = instruction.toUpperCase();
@@ -149,6 +167,28 @@ public class CavedMain {
         } else
         
          */
+
+        // interacting / crafting
+        if (instruction.charAt(0) == 'E') {
+            String subString = instruction.substring(1);
+            if (subString.equals("U")) {
+                map = interact(0, -1, map);
+            } else if (subString.equals("R")) {
+                map = interact(1, 0, map);
+            } else if (subString.equals("D")) {
+                map = interact(0, 1, map);
+            } else if (subString.equals("L")) {
+                map = interact(-1, 0, map);
+            } else if (subString.equals("I")) {
+                if (inv[0] >= 4) {
+                    inv[2]++;
+                    System.out.println("Crafting bench crafted");
+                } else {
+                    System.out.println("Not enough wood to make crafting bench");
+                }
+            }
+        }
+
         // movement
         if (inCave) {
             if (instruction.equals("W")) {
@@ -176,13 +216,13 @@ public class CavedMain {
         if (instruction.charAt(0) == 'M') {
             char secondChar = instruction.charAt(1);
             if (secondChar == 'R') {
-                mineBlock(1, 0);
+                map = mineBlock(1, 0, map);
             } else if (secondChar == 'L') {
-                mineBlock(-1, 0);
+                map = mineBlock(-1, 0, map);
             } else if (secondChar == 'U') {
-                mineBlock(0, -1);
+                map = mineBlock(0, -1, map);
             } else if (secondChar == 'D') {
-                mineBlock(0, 1);
+                map = mineBlock(0, 1, map);
             }
         }
 
@@ -190,13 +230,13 @@ public class CavedMain {
         if (instruction.charAt(0) == 'P') {
             char secondChar = instruction.charAt(1);
             if (secondChar == 'R') {
-                placeBlock(1, 0);
+                map = placeBlock(1, 0, map);
             } else if (secondChar == 'L') {
-                placeBlock(-1, 0);
+                map = placeBlock(-1, 0, map);
             } else if (secondChar == 'U') {
-                placeBlock(0, -1);
+                map = placeBlock(0, -1, map);
             } else if (secondChar == 'D') {
-                placeBlock(0, 1);
+                map = placeBlock(0, 1, map);
             }
         }
 
@@ -243,30 +283,10 @@ public class CavedMain {
                 invPos++;
             }
         }
-
-        // interacting / crafting
-        if (instruction.charAt(0) == 'E') {
-            String subString = instruction.substring(1);
-            if (subString.equals("U")) {
-                interact(0, -1);
-            } else if (subString.equals("R")) {
-                interact(1, 0);
-            } else if (subString.equals("D")) {
-                interact(0, 1);
-            } else if (subString.equals("L")) {
-                interact(-1, 0);
-            } else if (subString.equals("I")) {
-                if (inv[0] >= 4) {
-                    inv[2]++;
-                    System.out.println("Crafting bench crafted");
-                } else {
-                    System.out.println("Not enough wood to make crafting bench");
-                }
-            }
-        }
+        return map;
     }
 
-    public static void interact(int x, int y) {
+    public static BlockData[][] interact(int x, int y, BlockData[][] map) {
         if (map[playerY + y][playerX + x] != null) {
             if (map[playerY + y][playerX + x].id == 2) {
                 // the item to the offset space is a crafting bench
@@ -294,11 +314,11 @@ public class CavedMain {
                     System.out.println(item);
                 }
             } else if (map[playerY + y][playerX + x].id == 3) {
+                caveIn = map[playerY + y][playerX + x].num;
                 tempChunkX = chunkX;
                 tempChunkY = chunkY;
                 enterX = playerX;
                 enterY = playerY;
-                caveIn = map[playerY + y][playerX + x].num;
                 inCave = true;
                 playerX = 4;
                 playerY = 4;
@@ -306,16 +326,18 @@ public class CavedMain {
         } else {
             System.out.println("No interactable here");
         }
+
+        return map;
     }
 
-    public static void placeBlock(int x, int y) {
+    public static BlockData[][] placeBlock(int x, int y, BlockData[][] map) {
         System.out.println("What block do you want to place?");
         System.out.println("For wood enter 0, for dirt enter 1 and for a crafting bench enter 2");
         System.out.println("Amounts of each block are as the following");
         int block = inputInt("Wood: " + inv[0] + " / Dirt: " + inv[1] + " / CB: " + inv[2]);
 
         // if block to the offset doesnt exist then place block
-        if (!checkBlock(playerX + x, playerY + y)) {
+        if (!checkBlock(playerX + x, playerY + y, map)) {
             // if enough blocks in inv exists
             if (inv[block] > 0) {
                 // remove block
@@ -325,11 +347,12 @@ public class CavedMain {
                 System.out.println("Not enough blocks of that type");
             }
         }
+        return map;
     }
 
-    public static void mineBlock(int x, int y) {
+    public static BlockData[][] mineBlock(int x, int y, BlockData[][] map) {
         // if block to the offset exists mine it
-        if (checkBlock(playerX + x, playerY + y)) {
+        if (checkBlock(playerX + x, playerY + y, map)) {
             if (breakable[map[playerY + y][playerX + x].id]) {
                 // add block id to the right to inventory
                 inv[map[playerY + y][playerX + x].id]++;
@@ -339,9 +362,10 @@ public class CavedMain {
                 System.out.println("This block is not breakable.");
             }
         }
+        return map;
     }
 
-    public static boolean checkBlock(int x, int y) {
+    public static boolean checkBlock(int x, int y, BlockData[][] map) {
         if (map[y][x] != null) {
             return true;
         }
@@ -510,6 +534,8 @@ public class CavedMain {
         for (int n = 0; n < amount[3]; n++) {
             // for each cave apply the template
             cave[n] = caveTemplate;
+
+            // TODO issue seems like each interaction to the caves affect all other caves
 
             /*
             int x = randomInt(1, 8);
