@@ -36,7 +36,7 @@ public class CavedMain {
             - text file has cd data stored, player inventory stored and enemy data saved
             - save to save to to file located in documents with name specified
             - load to load that file located in documents with name specified
-        Caves
+        Caves - all interactions to caves for some reason affect all of the other caves
             - caves will include stone that is mineable and ores
             - caves may include enemies
         Player only door
@@ -64,6 +64,7 @@ public class CavedMain {
     static Scanner input = new Scanner(System.in);
 
     // map related variables
+    static String[] ct = { "AX", "SH", "AX", null, "PI", null };
     static String[] chars = { "W", "D", "C", "V", "S", "#" };
     static int[] amount = { 0, 0, 0, 0, 0, 0 };
     static String[] charColors = { "\u001B[33m", "\u001B[33m", "\u001B[34m", "\u001B[37m", "\u001B[37m", "\u001B[30m" };
@@ -110,15 +111,22 @@ public class CavedMain {
     // general game variables
     static boolean run = true;
 
-    static int size = inputInt("Enter desired size of map to generate in multiples of 9");
+    static int size = inputInt(
+            "Enter desired size of map to generate, map will work best if size entered is a multiple of 9");
+    static String secret = generating();
     static BlockData[][] map = new BlockData[size][size];
+
+    public static String generating() {
+        System.out.println("Generating...");
+        return "06/07/20";
+    }
 
     public static void main(String[] args) {
         map = genMap(size);
         BlockData[][][] caves = new BlockData[amount[3]][9][9];
-        System.out.println(amount[3]);
+        // System.out.println(amount[3]);
         caves = genCaves(caves);
-        printMap(map);
+        // printMap(map);
         while (run) {
             topUI();
             if (inCave) {
@@ -183,9 +191,12 @@ public class CavedMain {
                 if (inv[0] >= 4) {
                     inv[2]++;
                     System.out.println("Crafting bench crafted");
+                    inv[0] = inv[0] - 4;
                 } else {
                     System.out.println("Not enough wood to make crafting bench");
                 }
+            } else {
+                map = interact(0, 0, map);
             }
         }
 
@@ -214,29 +225,33 @@ public class CavedMain {
 
         // mining
         if (instruction.charAt(0) == 'M') {
-            char secondChar = instruction.charAt(1);
-            if (secondChar == 'R') {
+            String suffix = instruction.substring(1, instruction.length());
+            if (suffix.equals("R")) {
                 map = mineBlock(1, 0, map);
-            } else if (secondChar == 'L') {
+            } else if (suffix == "L") {
                 map = mineBlock(-1, 0, map);
-            } else if (secondChar == 'U') {
+            } else if (suffix.equals("U")) {
                 map = mineBlock(0, -1, map);
-            } else if (secondChar == 'D') {
+            } else if (suffix.equals("D")) {
                 map = mineBlock(0, 1, map);
+            } else {
+                map = mineBlock(0, 0, map);
             }
         }
 
         // placing
         if (instruction.charAt(0) == 'P') {
-            char secondChar = instruction.charAt(1);
-            if (secondChar == 'R') {
+            String suffix = instruction.substring(1, instruction.length());
+            if (suffix.equals("R")) {
                 map = placeBlock(1, 0, map);
-            } else if (secondChar == 'L') {
+            } else if (suffix.equals("L")) {
                 map = placeBlock(-1, 0, map);
-            } else if (secondChar == 'U') {
+            } else if (suffix.equals("U")) {
                 map = placeBlock(0, -1, map);
-            } else if (secondChar == 'D') {
+            } else if (suffix.equals("D")) {
                 map = placeBlock(0, 1, map);
+            } else {
+                map = placeBlock(0, 0, map);
             }
         }
 
@@ -291,8 +306,11 @@ public class CavedMain {
             if (map[playerY + y][playerX + x].id == 2) {
                 // the item to the offset space is a crafting bench
                 System.out.println("What item do you want to craft?");
-                System.out.println("Possible items include: dirt cake, axe, ct(crafting table)");
-                String item = inputString("Type name of item to craft");
+                System.out.println("1. Dirt Cake 'dirt', 1 dirt");
+                System.out.println("2. Axe 'axe', 2 wood");
+                System.out.println("3. Pickaxe 'pickaxe', 3 wood");
+                System.out.println("4. Shovel 'shovel', 1 wood");
+                String item = inputString("Type name of item in quotation marks to craft");
                 item = item.toUpperCase();
                 if (item.equals("DIRT")) {
                     if (inv[1] >= 1) {
@@ -310,8 +328,26 @@ public class CavedMain {
                     } else {
                         System.out.println("Not enough wood to make an axe");
                     }
+                } else if (item.equals("PICKAXE")) {
+                    if (inv[0] >= 3) {
+                        tb[1] = "PI";
+                        System.out.println("A pickaxe was crafted");
+                        inv[0] = inv[0] - 3;
+                    } else {
+                        System.out.println("Not enough wood to make a pickaxe");
+                    }
+                } else if (item.equals("SHOVEL")) {
+                    if (inv[0] >= 1) {
+                        tb[0] = "SH";
+                        System.out.println("A shovel was crafted");
+                        inv[0] = inv[0] - 2;
+                    } else {
+                        System.out.println("Not enough wood to make a shovel");
+                    }
+                } else if (item.equals("")) {
+
                 } else {
-                    System.out.println(item);
+                    System.out.println(item + "could not be crafted.");
                 }
             } else if (map[playerY + y][playerX + x].id == 3) {
                 caveIn = map[playerY + y][playerX + x].num;
@@ -342,7 +378,7 @@ public class CavedMain {
             if (inv[block] > 0) {
                 // remove block
                 inv[block]--;
-                map[playerY + y][playerX + x] = new BlockData(block, playerX + x, playerY + y, 2, amount[block]++);
+                map[playerY + y][playerX + x] = new BlockData(block, playerX + x, playerY + y, 3, amount[block]++);
             } else {
                 System.out.println("Not enough blocks of that type");
             }
@@ -350,17 +386,41 @@ public class CavedMain {
         return map;
     }
 
+    public static boolean checkTool(int id) {
+        for (int i = 0; i < tb.length; i++) {
+            if (ct[id].equals(tb[i])) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static BlockData[][] mineBlock(int x, int y, BlockData[][] map) {
+        if (map[playerY + y][playerX + x] == null) {
+            return map;
+        }
+        int id = map[playerY + y][playerX + x].id;
+        Boolean ct = checkTool(id);
+        int dmg;
+        if (ct) {
+            dmg = 3;
+        } else {
+            dmg = 1;
+        }
         // if block to the offset exists mine it
+
         if (checkBlock(playerX + x, playerY + y, map)) {
-            if (breakable[map[playerY + y][playerX + x].id]) {
+            if (map[playerY + y][playerX + x].dur >= 1) {
+                map[playerY + y][playerX + x].dur = map[playerY + y][playerX + x].dur - dmg;
+            }
+            if (breakable[map[playerY + y][playerX + x].id] && map[playerY + y][playerX + x].dur <= 0) {
                 // add block id to the right to inventory
                 inv[map[playerY + y][playerX + x].id]++;
                 // set id of block to the right to null
                 map[playerY + y][playerX + x] = null;
-            } else {
-                System.out.println("This block is not breakable.");
             }
+        } else {
+            System.out.println("This block is not breakable.");
         }
         return map;
     }
@@ -439,7 +499,7 @@ public class CavedMain {
 
     // print current chunk
     public static void printChunk(BlockData[][] chunk, String backgroundColor, int chunkX, int chunkY) {
-        System.out.println(caveIn);
+        // System.out.println(caveIn);
         for (int y = (((chunkY + 1) * 9) - 9); y <= (((chunkY + 1) * 9) - 1); y++) {
             System.out.print("[|      ");
             for (int x = (((chunkX + 1) * 9) - 9); x <= (((chunkX + 1) * 9) - 1); x++) {
@@ -459,6 +519,7 @@ public class CavedMain {
     // print top section of user interface
     public static void topUI() {
         // prints health tag
+
         System.out.print("[HEA:]");
 
         // prints full hearts
@@ -484,8 +545,14 @@ public class CavedMain {
         System.out.println("[+----- 1 2 3 4 5 6 7 8 9 -----+]");
         // prints toolbar and itembar
         System.out.print("[TO:]" + "[" + tb[0] + "]" + "[" + tb[1] + "]" + "[" + tb[2] + "]" + "[ITE:]" + "[");
+
+        String amt = inv[invPos] + "";
+
         if (inv[0] < 10) {
-            System.out.print("0" + inv[invPos] + chars[invPos]);
+            System.out.print("0" + amt + chars[invPos]);
+        } else if (inv[0] <= 99) {
+            amt = amt.substring(amt.length() - 2, amt.length());
+            System.out.print(amt + chars[invPos]);
         }
         System.out.print("][");
         if (inv[1] < 10) {
@@ -514,13 +581,20 @@ public class CavedMain {
             int y = randomInt(0, 9 * size / 9);
             int id = randomInt(0, 81);
             if (id % 17 == 0) {
-                id = 3;
+                if (y - 1 >= 0 && y + 1 < size && x - 1 >= 0 && x + 1 < size) {
+                    map[y + 1][x] = new BlockData(4, x, y + 1, 4, amount[4]++);
+                    map[y - 1][x] = new BlockData(4, x, y - 1, 4, amount[4]++);
+                    map[y][x + 1] = new BlockData(4, x + 1, y, 4, amount[4]++);
+                    map[y][x - 1] = new BlockData(4, x - 1, y, 4, amount[4]++);
+                }
+                id = 4;
             } else {
                 id = randomInt(0, 2);
             }
-            int dur = 2;
+            int dur = 3;
             // System.out.println(x + "" + y + "" + id);
             // put block down using block data with those random numbers
+
             if (map[y][x] == null) {
                 map[y][x] = new BlockData(id, x, y, dur, amount[id]++);
             }
