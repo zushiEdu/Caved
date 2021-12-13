@@ -2,7 +2,7 @@
 >A replit containing this game can be found [here](https://replit.com/@zushiEdu/Caved).
 
 #### Future features
-1. Make tools have function
+✓ 1. Make tools have function
     1. More efficient block mining requiring a rework of the map system
 2. Add enemies
     1. Enemies follow the player when within a radius
@@ -13,18 +13,14 @@
     2. Give user the option to load world before and while game is running
     3. Give ability to list worlds
     4. Loading and saving worlds actions have to be provided worlds names
-4. Door
-    1. Protection against enemies
-    2. Advanced pathfinding needs to be added first
-5. Caves
+✓ 4. Caves
     1. Map turns into a square cave
     2. Edges become unbreakable and stairs are in the middle
     3. Mobs have chances of spawnign
     4. Ores and stone spawn
     5. Cave data is stored as objects
-6. Custom ascii characters?
+5. Custom ascii characters / graphical interface
     1. This could be acompalished by making a custom font and having the game use that font
 
 #### Known Bugs
-1. Sometimes when mining blocks it adds one of that item to the inventory without actually mining it
-    1. This lets blocks to be picked up more than one time(s)
+No known bugs.
