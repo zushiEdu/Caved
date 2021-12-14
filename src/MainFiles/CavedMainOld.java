@@ -14,7 +14,7 @@ public class CavedMainOld {
      */
     public static void main(String[] args) {
 
-        /* TODO
+        /*
         Make tools do something
             - turn block data into an array of values [durability, type, x, y]
                 - this not only benifits not having to retrofit all code with this new data type but also makes for future expansion easier
