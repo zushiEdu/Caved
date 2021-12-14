@@ -15,13 +15,8 @@ import java.util.Scanner;
 public class CavedMain {
 
     /*
-        Make tools do something
-            - turn block data into an array of values [durability, type, x, y]
-                - this not only benifits not having to retrofit all code with this new data type but also makes for future expansion easier
-                - makes doors, mob check, world gen and everything that relates to block interactions easier (everything)
-            - this makes all map data accessable at random 
-            - removes the need for map data extraction (a slow inefficient process)
-        Make enemies
+        Tools - Done
+        - Make enemies
             - if delta is bigger than 5 dont find player
             - when player not found pick a random place on the map to move to
             - if player found at any point go to player and cause damage when beside player
@@ -31,29 +26,18 @@ public class CavedMain {
             - this creates super pathfinding
             - eventually make enemies not able to move through blocks
             - if somehow the enemy moves onto the same place as the player make the player die
-        Make world save & load
+        - Make world save & load
             - save to editable file
             - text file has cd data stored, player inventory stored and enemy data saved
             - save to save to to file located in documents with name specified
             - load to load that file located in documents with name specified
-        Caves - all interactions to caves for some reason affect all of the other caves
-            - caves will include stone that is mineable and ores
-            - caves may include enemies
-        Player only door
-            - item in which only a player can pass through acting as an automatic door
-        Change characters on screen to easier to read characters
+        Ore Lumps - Done
+        Doors - Not Needed
+        - Change characters on screen to easier to read characters
             - search through ascii tables for this
         
         ### KNOWN BUGS ####
      */
-    // BLACK "\033[0;30m"
-    // RED "\033[0;31m"
-    // GREEN "\033[0;32m"
-    // YELLOW "\033[0;33m"
-    // BLUE "\033[0;34m"
-    // PURPLE "\033[0;35m"
-    // CYAN "\033[0;36m"
-    // WHITE "\033[0;37m"
 
     // TODO Add JColor for combined highlighting and foregrounding
 
@@ -75,6 +59,7 @@ public class CavedMain {
 
     static BlockData bound = new BlockData(5, 0, 0, 1, amount[5]++);
 
+    /*
     static BlockData[][] caveTemplate = {
             { bound, bound, bound, bound, bound, bound, bound, bound, bound },
             { bound, null, null, null, null, null, null, null, bound },
@@ -86,6 +71,7 @@ public class CavedMain {
             { bound, null, null, null, null, null, null, null, bound },
             { bound, bound, bound, bound, bound, bound, bound, bound, bound }
     };
+    */
 
     static boolean inCave;
     static int enterX;
@@ -123,20 +109,20 @@ public class CavedMain {
 
     public static void main(String[] args) {
         map = genMap(size);
-        BlockData[][][] caves = new BlockData[amount[3]][9][9];
+        // BlockData[][][] caves = new BlockData[amount[3]][9][9];
         // System.out.println(amount[3]);
-        caves = genCaves(caves);
+        // caves = genCaves(caves);
         // printMap(map);
         while (run) {
             topUI();
             if (inCave) {
-                printChunk(caves[caveIn], "\u001B[37m", 0, 0);
+                // printChunk(caves[caveIn], "\u001B[37m", 0, 0);
             } else {
                 printChunk(map, "\u001B[32m", chunkX, chunkY);
             }
             bottomUI();
             if (inCave) {
-                caves[caveIn] = userInput(caves[caveIn]);
+                // caves[caveIn] = userInput(caves[caveIn]);
             } else {
                 map = userInput(map);
             }
@@ -195,7 +181,7 @@ public class CavedMain {
                 } else {
                     System.out.println("Not enough wood to make crafting bench");
                 }
-            } else {
+            } else if (subString.equals("")) {
                 map = interact(0, 0, map);
             }
         }
@@ -350,6 +336,7 @@ public class CavedMain {
                     System.out.println(item + "could not be crafted.");
                 }
             } else if (map[playerY + y][playerX + x].id == 3) {
+                /*
                 caveIn = map[playerY + y][playerX + x].num;
                 tempChunkX = chunkX;
                 tempChunkY = chunkY;
@@ -358,6 +345,7 @@ public class CavedMain {
                 inCave = true;
                 playerX = 4;
                 playerY = 4;
+                */
             }
         } else {
             System.out.println("No interactable here");
@@ -368,9 +356,12 @@ public class CavedMain {
 
     public static BlockData[][] placeBlock(int x, int y, BlockData[][] map) {
         System.out.println("What block do you want to place?");
-        System.out.println("For wood enter 0, for dirt enter 1 and for a crafting bench enter 2");
-        System.out.println("Amounts of each block are as the following");
-        int block = inputInt("Wood: " + inv[0] + " / Dirt: " + inv[1] + " / CB: " + inv[2]);
+        System.out.println("1. For wood enter 0, Amount: " + inv[0]);
+        System.out.println("2. For dirt enter 1, Amount: " + inv[1]);
+        System.out.println("3. For a crafting bench enter 2, Amount: " + inv[2]);
+        System.out.println("4. For stone enter 4, Amount: " + inv[4]);
+
+        int block = inputInt("");
 
         // if block to the offset doesnt exist then place block
         if (!checkBlock(playerX + x, playerY + y, map)) {
@@ -403,7 +394,7 @@ public class CavedMain {
         Boolean ct = checkTool(id);
         int dmg;
         if (ct) {
-            dmg = 3;
+            dmg = 4;
         } else {
             dmg = 1;
         }
@@ -607,7 +598,8 @@ public class CavedMain {
     public static BlockData[][][] genCaves(BlockData[][][] cave) {
         for (int n = 0; n < amount[3]; n++) {
             // for each cave apply the template
-            cave[n] = caveTemplate;
+
+            // cave[n] = caveTemplate;
 
             // TODO issue seems like each interaction to the caves affect all other caves
 
