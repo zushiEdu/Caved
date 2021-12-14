@@ -10,8 +10,7 @@ import java.util.Scanner;
 public class CavedMain {
 
     /*
-        Tools - Done
-        - Make enemies
+        - Make enemies 
             - if delta is bigger than 5 dont find player
             - when player not found pick a random place on the map to move to
             - if player found at any point go to player and cause damage when beside player
@@ -26,17 +25,10 @@ public class CavedMain {
             - text file has cd data stored, player inventory stored and enemy data saved
             - save to save to to file located in documents with name specified
             - load to load that file located in documents with name specified
-        Ore Lumps - Done
-        Doors - Not Needed
         - Change characters on screen to easier to read characters
             - search through ascii tables for this
-        
-        ### KNOWN BUGS ####
      */
 
-    // TODO Add JColor for combined highlighting and foregrounding
-
-    // For background use 4 infront of color id instead of 3
     /**
      * @param args the command line arguments
      */
@@ -46,10 +38,14 @@ public class CavedMain {
     static String[] ct = { "AX", "SH", "AX", null, "PI", null };
     static String[] chars = { "W", "D", "C", "V", "S", "#" };
     static int[] amount = { 0, 0, 0, 0, 0, 0 };
+    // static String[] charColors = { "\u001B[43m", "\u001B[43m", "\u001B[44m", "\u001B[47m", "\u001B[47m", "\u001B[40m" };
     static String[] charColors = { "\u001B[33m", "\u001B[33m", "\u001B[34m", "\u001B[37m", "\u001B[37m", "\u001B[30m" };
     static Boolean[] breakable = { true, true, true, false, true, false };
     static String reset = "\u001B[0m";
-    static String playerC = "\u001B[36m";
+    // \u001b[35m magenta
+    // \u001b[36m cyan
+    // \u001b[34m blue
+    static String playerC = "\u001B[34m";
     static String health = "\u001B[31m";
 
     static BlockData bound = new BlockData(5, 0, 0, 1, amount[5]++);
@@ -73,15 +69,8 @@ public class CavedMain {
     static int enterY;
     static int caveIn = 0;
 
-    static int chunkX = 0;
-    static int chunkY = 0;
-
     static int tempChunkX;
     static int tempChunkY;
-
-    // general player related variables
-    static int playerX = 0;
-    static int playerY = 0;
 
     static int playerHp = 3;
     // inventory player related variables
@@ -96,6 +85,25 @@ public class CavedMain {
             "Enter desired size of map to generate, map will work best if size entered is a multiple of 9");
     static String secret = generating();
     static BlockData[][] map = new BlockData[size][size];
+
+    // general player related variables
+    static int playerX = centerPlayer(size);
+    static int playerY = centerPlayer(size);
+
+    static int chunkX = posToChunk(centerPlayer(size));
+    static int chunkY = posToChunk(centerPlayer(size));
+
+    public static int posToChunk(int pos) {
+        return pos / 9;
+    }
+
+    public static int centerPlayer(int size) {
+        if ((size / 9) % 2 == 0) {
+            return (size / 2) + 4;
+        } else {
+            return size / 2;
+        }
+    }
 
     public static String generating() {
         System.out.println("Generating...");
@@ -286,6 +294,7 @@ public class CavedMain {
             System.out.println(
                     "Crafting - Type 'Ei' to craft a crafting bench, 4 wood required. Otherwise interact with a crafting bench with E +/ Directional Keys");
             System.out.println("Map view - 'Map' to view map");
+            System.out.println("Block atlas, P Player, S Stone, W Wood, D Dirt, M Monster, C Crafting Bench");
             System.out.println("Regeneration - 'Regen' to regenerate the map");
             System.out.println("Block distribution - 'Sum' to view amounts of each block on the map");
             System.out.println("End game - 'Stop' or 'Exit' to exit / stop game");
@@ -598,6 +607,19 @@ public class CavedMain {
             int id = randomInt(0, 81);
             if (id % 17 == 0) {
                 if (y - 1 >= 0 && y + 1 < size && x - 1 >= 0 && x + 1 < size) {
+                    // i know this is terrible code dont bug me about it
+                    if (randomBool()) {
+                        map[y + 1][x + 1] = new BlockData(4, x + 1, y + 1, 4, amount[4]++);
+                    }
+                    if (randomBool()) {
+                        map[y + 1][x - 1] = new BlockData(4, x - 1, y + 1, 4, amount[4]++);
+                    }
+                    if (randomBool()) {
+                        map[y - 1][x + 1] = new BlockData(4, x + 1, y - 1, 4, amount[4]++);
+                    }
+                    if (randomBool()) {
+                        map[y - 1][x - 1] = new BlockData(4, x - 1, y - 1, 4, amount[4]++);
+                    }
                     map[y + 1][x] = new BlockData(4, x, y + 1, 4, amount[4]++);
                     map[y - 1][x] = new BlockData(4, x, y - 1, 4, amount[4]++);
                     map[y][x + 1] = new BlockData(4, x + 1, y, 4, amount[4]++);
@@ -645,6 +667,14 @@ public class CavedMain {
         Random random = new Random();
         int rndInt = (random.nextInt((max - min))) + min;
         return rndInt;
+    }
+
+    public static boolean randomBool() {
+        if (randomInt(0, 2) == 1) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     // input a message, get back an int
