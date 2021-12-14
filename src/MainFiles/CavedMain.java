@@ -648,8 +648,6 @@ public class CavedMain {
 
             // cave[n] = caveTemplate;
 
-            // TODO issue seems like each interaction to the caves affect all other caves
-
             /*
             int x = randomInt(1, 8);
             int y = randomInt(1, 8);
