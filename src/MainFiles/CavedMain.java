@@ -108,6 +108,7 @@ public class CavedMain {
         // System.out.println(amount[3]);
         // caves = genCaves(caves);
         // printMap(map);
+        System.out.println("Type 'help' for help menu");
         while (run) {
             topUI();
             if (inCave) {
@@ -262,6 +263,35 @@ public class CavedMain {
             printAmount();
         }
 
+        if (instruction.equals("REGEN")) {
+            // clear map then regenerate
+            for (int y = 0; y < map.length; y++) {
+                for (int x = 0; x < map.length; x++) {
+                    map[y][x] = null;
+                }
+            }
+            genMap(size);
+        }
+
+        if (instruction.equals("HELP")) {
+            System.out.println("");
+            System.out.println("--- Help Menu ---");
+            System.out.println("Movement - W Up, A Left, S Down, D Right");
+            System.out.println("Scrolling of inventory - E Right, Q Left");
+            System.out.println("Mining - M Standalone for location of player or combined with the directional keys");
+            System.out.println("Placing - P Standalone for location of player or combined with the directional keys");
+            System.out
+                    .println("Interacting - E Standalone for location of player or combined with the directional keys");
+            System.out.println("Directional Keys - U for up 1, R for right 1, L for left 1, D for down 1");
+            System.out.println(
+                    "Crafting - Type 'Ei' to craft a crafting bench, 4 wood required. Otherwise interact with a crafting bench with E +/ Directional Keys");
+            System.out.println("Map view - 'Map' to view map");
+            System.out.println("Regeneration - 'Regen' to regenerate the map");
+            System.out.println("Block distribution - 'Sum' to view amounts of each block on the map");
+            System.out.println("End game - 'Stop' or 'Exit' to exit / stop game");
+            System.out.println("");
+        }
+
         // game force quit
         if (instruction.equals("STOP") || instruction.equals("EXIT")) {
             System.out.println("Hope to see you again");
@@ -319,7 +349,7 @@ public class CavedMain {
                     }
                 } else if (item.equals("SHOVEL")) {
                     if (inv[0] >= 1) {
-                        tb[0] = "SH";
+                        tb[2] = "SH";
                         System.out.println("A shovel was crafted");
                         inv[0] = inv[0] - 2;
                     } else {
