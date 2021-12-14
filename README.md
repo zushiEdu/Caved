@@ -21,6 +21,7 @@
     5. Cave data is stored as objects
 5. Custom ascii characters / graphical interface
     1. This could be acompalished by making a custom font and having the game use that font
+✓ 6. Help Menu
 
 #### Known Bugs
 No known bugs.
