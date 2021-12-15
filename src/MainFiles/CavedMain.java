@@ -27,6 +27,11 @@ public class CavedMain {
             - load to load that file located in documents with name specified
         - Change characters on screen to easier to read characters
             - search through ascii tables for this
+    
+        Short form version
+        - Monsters
+        - Save / Loading
+        - GUI?
      */
 
     /**
@@ -35,18 +40,20 @@ public class CavedMain {
     static Scanner input = new Scanner(System.in);
 
     // map related variables
-    static String[] ct = { "AX", "SH", "AX", null, "PI", null };
-    static String[] chars = { "W", "D", "C", "V", "S", "#" };
-    static int[] amount = { 0, 0, 0, 0, 0, 0 };
+    static String[] ct = { "AX", "SH", "AX", null, "PI", "AX" };
+    static String[] chars = { "W", "D", "C", "V", "S", "B" };
+    static int[] amount = { 100, 0, 0, 0, 0, 0 };
     // static String[] charColors = { "\u001B[43m", "\u001B[43m", "\u001B[44m", "\u001B[47m", "\u001B[47m", "\u001B[40m" };
     static String[] charColors = { "\u001B[33m", "\u001B[33m", "\u001B[34m", "\u001B[37m", "\u001B[37m", "\u001B[30m" };
-    static Boolean[] breakable = { true, true, true, false, true, false };
+    static Boolean[] breakable = { true, true, true, false, true, true };
     static String reset = "\u001B[0m";
     // \u001b[35m magenta
     // \u001b[36m cyan
     // \u001b[34m blue
     static String playerC = "\u001B[34m";
     static String health = "\u001B[31m";
+
+    static String mobC = "\u001B[31m";
 
     static BlockData bound = new BlockData(5, 0, 0, 1, amount[5]++);
 
@@ -75,7 +82,7 @@ public class CavedMain {
     static int playerHp = 3;
     // inventory player related variables
     static String[] tb = { "  ", "  ", "  " };
-    static int[] inv = { 0, 0, 0, 0, 0, 0 };
+    static int[] inv = { 99, 0, 0, 0, 0, 0 };
     static int invPos = 0;
 
     // general game variables
@@ -92,6 +99,11 @@ public class CavedMain {
 
     static int chunkX = posToChunk(centerPlayer(size));
     static int chunkY = posToChunk(centerPlayer(size));
+
+    static int spawnX = playerX;
+    static int spawnY = playerY;
+
+    static MobData[][] mobs = new MobData[size][size];
 
     public static int posToChunk(int pos) {
         return pos / 9;
@@ -112,12 +124,14 @@ public class CavedMain {
 
     public static void main(String[] args) {
         map = genMap(size);
+        genMobs(size);
         // BlockData[][][] caves = new BlockData[amount[3]][9][9];
         // System.out.println(amount[3]);
         // caves = genCaves(caves);
         // printMap(map);
         System.out.println("Type 'help' for help menu");
         while (run) {
+            moveMobs();
             topUI();
             if (inCave) {
                 // printChunk(caves[caveIn], "\u001B[37m", 0, 0);
@@ -151,6 +165,39 @@ public class CavedMain {
         input.close();
     }
 
+    public static void moveMobs() {
+        for (int y = 0; y < mobs.length; y++) {
+            for (int x = 0; x < mobs[y].length; x++) {
+                if (mobs[y][x] != null) {
+                    if (mobs[y][x].x > playerX && map[mobs[y][x].y][mobs[y][x].x - 1] == null) {
+                        //mobs[y][x] = mobs[y][x - 1];
+                        mobs[y][x].x--;
+                    }
+                    if (mobs[y][x].x < playerX && map[mobs[y][x].y][mobs[y][x].x + 1] == null) {
+                        mobs[y][x].x++;
+                    }
+                    if (mobs[y][x].y > playerY && map[mobs[y][x].y - 1][mobs[y][x].x] == null) {
+                        mobs[y][x].y--;
+                    }
+                    if (mobs[y][x].y < playerY && map[mobs[y][x].y + 1][mobs[y][x].x] == null) {
+                        mobs[y][x].y++;
+                    }
+                }
+            }
+        }
+    }
+
+    public static void genMobs(int size) {
+        for (int i = 0; i < size; i++) {
+            int x = randomInt(0, size);
+            int y = randomInt(0, size);
+            if (mobs[y][x] == null) {
+                mobs[y][x] = new MobData(2, x, y);
+            }
+            // System.out.println(mobs[y][x].x + " " + mobs[y][x].y);
+        }
+    }
+
     public static BlockData[][] userInput(BlockData[][] map) {
         String instruction;
         instruction = inputString("");
@@ -167,7 +214,7 @@ public class CavedMain {
          */
 
         // interacting / crafting
-        if (instruction.charAt(0) == 'E') {
+        if (instruction.charAt(0) == 'R') {
             String subString = instruction.substring(1);
             if (subString.equals("U")) {
                 map = interact(0, -1, map);
@@ -289,10 +336,10 @@ public class CavedMain {
             System.out.println("Mining - M Standalone for location of player or combined with the directional keys");
             System.out.println("Placing - P Standalone for location of player or combined with the directional keys");
             System.out
-                    .println("Interacting - E Standalone for location of player or combined with the directional keys");
+                    .println("Interacting - R Standalone for location of player or combined with the directional keys");
             System.out.println("Directional Keys - U for up 1, R for right 1, L for left 1, D for down 1");
             System.out.println(
-                    "Crafting - Type 'Ei' to craft a crafting bench, 4 wood required. Otherwise interact with a crafting bench with E +/ Directional Keys");
+                    "Crafting - Type 'Ri' to craft a crafting bench, 4 wood required. Otherwise interact with a crafting bench with E +/ Directional Keys");
             System.out.println("Map view - 'Map' to view map");
             System.out.println("Block atlas, P Player, S Stone, W Wood, D Dirt, M Monster, C Crafting Bench");
             System.out.println("Regeneration - 'Regen' to regenerate the map");
@@ -318,6 +365,25 @@ public class CavedMain {
                 invPos++;
             }
         }
+
+        if (instruction.equals("X")) {
+            if (map[spawnY][spawnX] != null) {
+                if (map[spawnY][spawnX].id == 5) {
+                    playerX = spawnX;
+                    chunkX = posToChunk(spawnX);
+                    playerY = spawnY;
+                    chunkY = posToChunk(spawnY);
+                }
+            } else {
+                System.out.println("Spawnpoint missing");
+                playerX = centerPlayer(size);
+                playerY = centerPlayer(size);
+                chunkX = posToChunk(centerPlayer(size));
+                chunkY = posToChunk(centerPlayer(size));
+            }
+
+        }
+
         return map;
     }
 
@@ -330,6 +396,7 @@ public class CavedMain {
                 System.out.println("2. Axe 'axe', 2 wood");
                 System.out.println("3. Pickaxe 'pickaxe', 3 wood");
                 System.out.println("4. Shovel 'shovel', 1 wood");
+                System.out.println("5. Bed 'bed', 5 wood");
                 String item = inputString("Type name of item in quotation marks to craft");
                 item = item.toUpperCase();
                 if (item.equals("DIRT")) {
@@ -364,8 +431,12 @@ public class CavedMain {
                     } else {
                         System.out.println("Not enough wood to make a shovel");
                     }
-                } else if (item.equals("")) {
-
+                } else if (item.equals("BED")) {
+                    if (inv[0] >= 5) {
+                        inv[5]++;
+                        System.out.println("A bed was crafted");
+                        inv[0] = inv[0] - 5;
+                    }
                 } else {
                     System.out.println(item + "could not be crafted.");
                 }
@@ -380,6 +451,10 @@ public class CavedMain {
                 playerX = 4;
                 playerY = 4;
                 */
+            } else if (map[playerY + y][playerX + x].id == 5) {
+                spawnX = map[playerY + y][playerX + x].x;
+                spawnY = map[playerY + y][playerX + x].y;
+                System.out.println("Spawn point set.");
             }
         } else {
             System.out.println("No interactable here");
@@ -394,6 +469,7 @@ public class CavedMain {
         System.out.println("2. For dirt enter 1, Amount: " + inv[1]);
         System.out.println("3. For a crafting bench enter 2, Amount: " + inv[2]);
         System.out.println("4. For stone enter 4, Amount: " + inv[4]);
+        System.out.println("5. For a bed enter 5, Amount: " + inv[5]);
 
         int block = inputInt("");
 
@@ -514,6 +590,8 @@ public class CavedMain {
                     System.out.print(charColors[map[y][x].id] + chars[map[y][x].id] + " " + reset);
                 } else if (y == playerY && x == playerX) {
                     System.out.print(playerC + "P " + reset);
+                } else if (mobs[y][x] != null) {
+                    System.out.print(mobC + "M " + reset);
                 } else {
                     System.out.print("\u001B[32m" + "O " + reset);
                 }
@@ -528,10 +606,12 @@ public class CavedMain {
         for (int y = (((chunkY + 1) * 9) - 9); y <= (((chunkY + 1) * 9) - 1); y++) {
             System.out.print("[|      ");
             for (int x = (((chunkX + 1) * 9) - 9); x <= (((chunkX + 1) * 9) - 1); x++) {
-                if (chunk[y][x] != null) {
+                if (map[y][x] != null) {
                     System.out.print(charColors[chunk[y][x].id] + chars[chunk[y][x].id] + " " + reset);
                 } else if (y == playerY && x == playerX) {
                     System.out.print(playerC + "P " + reset);
+                } else if (mobs[y][x] != null) {
+                    System.out.print(mobC + "M " + reset);
                 } else {
                     System.out.print(backgroundColor + "O " + reset);
                 }
@@ -571,18 +651,23 @@ public class CavedMain {
         // prints toolbar and itembar
         System.out.print("[TO:]" + "[" + tb[0] + "]" + "[" + tb[1] + "]" + "[" + tb[2] + "]" + "[ITE:]" + "[");
 
-        String amt = inv[invPos] + "";
+        String amt0 = inv[invPos] + "";
+        String amt1 = inv[invPos + 1] + "";
 
         if (inv[0] < 10) {
-            System.out.print("0" + amt + chars[invPos]);
-        } else if (inv[0] <= 99) {
-            amt = amt.substring(amt.length() - 2, amt.length());
-            System.out.print(amt + chars[invPos]);
+            System.out.print("0" + amt0 + chars[invPos]);
+        } else if (inv[0] >= 10) {
+            amt0 = amt0.substring(amt0.length() - 2, amt0.length());
+            System.out.print(amt0 + chars[invPos]);
         }
         System.out.print("][");
         if (inv[1] < 10) {
-            System.out.print("0" + inv[invPos + 1] + chars[invPos + 1] + "]");
+            System.out.print("0" + amt1 + chars[invPos + 1]);
+        } else if (inv[1] >= 10) {
+            amt1 = amt1.substring(amt1.length() - 2, amt1.length());
+            System.out.print(amt1 + chars[invPos + 1]);
         }
+        System.out.print("]");
         System.out.println("");
     }
 
