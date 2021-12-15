@@ -143,6 +143,9 @@ public class CavedMain {
 
             playerX = spawnX;
             playerY = spawnY;
+
+            chunkX = posToChunk(spawnX);
+            chunkY = posToChunk(spawnY);
             for (int i = 0; i < inv.length; i++) {
                 inv[i] = inv[i] / 5;
             }
@@ -151,21 +154,32 @@ public class CavedMain {
     }
 
     public static void moveMobs() {
+        for (int i = 0; i < mobs.length; i++) {
+            if (mobs[i] != null) {
+                if (mobs[i].health <= 0) {
+                    mobs[i] = null;
+                }
+            }
+        }
         if (randomBool(0, 5)) {
             for (int i = 0; i < mobs.length; i++) {
                 if (mobs[i] != null) {
                     if (mobs[i].x > playerX && map[mobs[i].y][mobs[i].x - 1] == null) {
-                        mobs[i].x--;
+                        if (mobs[i].x - 1 != playerX) {
+                            mobs[i].x--;
+                        }
                     } else if (mobs[i].x < playerX && map[mobs[i].y][mobs[i].x + 1] == null) {
-                        mobs[i].x++;
+                        if (mobs[i].x + 1 != playerX) {
+                            mobs[i].x++;
+                        }
                     } else if (mobs[i].y > playerY && map[mobs[i].y - 1][mobs[i].x] == null) {
-                        mobs[i].y--;
+                        if (mobs[i].y - 1 != playerY) {
+                            mobs[i].y--;
+                        }
                     } else if (mobs[i].y < playerY && map[mobs[i].y + 1][mobs[i].x] == null) {
-                        mobs[i].y++;
-                    }
-
-                    if (mobs[i].health <= 0) {
-                        mobs[i] = null;
+                        if (mobs[i].y + 1 != playerY) {
+                            mobs[i].y++;
+                        }
                     }
 
                     if (mobs[i] != null) {
@@ -255,7 +269,7 @@ public class CavedMain {
             String suffix = instruction.substring(1, instruction.length());
             if (suffix.equals("R")) {
                 map = mineBlock(1, 0, map);
-            } else if (suffix == "L") {
+            } else if (suffix.equals("L")) {
                 map = mineBlock(-1, 0, map);
             } else if (suffix.equals("U")) {
                 map = mineBlock(0, -1, map);
@@ -635,12 +649,14 @@ public class CavedMain {
     // damage
     public static void damage(int x, int y) {
         for (int i = 0; i < mobs.length; i++) {
-            if (playerX + x == mobs[i].x && playerY + y == mobs[i].y) {
-                if (checkTool(0)) {
-                    mobs[i].health = 0;
-                } else {
-                    mobs[i].health--;
-                    System.out.println("That mob has " + mobs[i].health + "hp left");
+            if (mobs[i] != null) {
+                if (playerX + x == mobs[i].x && playerY + y == mobs[i].y) {
+                    if (checkTool(0)) {
+                        mobs[i].health = 0;
+                    } else {
+                        mobs[i].health--;
+                        System.out.println("That mob has " + mobs[i].health + "hp left");
+                    }
                 }
             }
         }
