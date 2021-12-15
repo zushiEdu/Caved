@@ -43,33 +43,15 @@ public class CavedMain {
     static String[] ct = { "AX", "SH", "AX", null, "PI", "AX" };
     static String[] chars = { "W", "D", "C", "V", "S", "B" };
     static int[] amount = { 100, 0, 0, 0, 0, 0 };
-    // static String[] charColors = { "\u001B[43m", "\u001B[43m", "\u001B[44m", "\u001B[47m", "\u001B[47m", "\u001B[40m" };
     static String[] charColors = { "\u001B[33m", "\u001B[33m", "\u001B[34m", "\u001B[37m", "\u001B[37m", "\u001B[30m" };
     static Boolean[] breakable = { true, true, true, false, true, true };
     static String reset = "\u001B[0m";
-    // \u001b[35m magenta
-    // \u001b[36m cyan
-    // \u001b[34m blue
     static String playerC = "\u001B[34m";
     static String health = "\u001B[31m";
 
     static String mobC = "\u001B[31m";
 
     static BlockData bound = new BlockData(5, 0, 0, 1, amount[5]++);
-
-    /*
-    static BlockData[][] caveTemplate = {
-            { bound, bound, bound, bound, bound, bound, bound, bound, bound },
-            { bound, null, null, null, null, null, null, null, bound },
-            { bound, null, null, null, null, null, null, null, bound },
-            { bound, null, null, null, null, null, null, null, bound },
-            { bound, null, null, null, null, null, null, null, bound },
-            { bound, null, null, null, null, null, null, null, bound },
-            { bound, null, null, null, null, null, null, null, bound },
-            { bound, null, null, null, null, null, null, null, bound },
-            { bound, bound, bound, bound, bound, bound, bound, bound, bound }
-    };
-    */
 
     static boolean inCave;
     static int enterX;
@@ -161,35 +143,35 @@ public class CavedMain {
                 }
             }
         }
-        if (randomBool(0, 5)) {
-            for (int i = 0; i < mobs.length; i++) {
+        for (int i = 0; i < mobs.length; i++) {
+            if (randomBool(0, 4)) {
+
                 if (mobs[i] != null) {
                     if (mobs[i].x > playerX && map[mobs[i].y][mobs[i].x - 1] == null) {
-                        if (mobs[i].x - 1 != playerX) {
+                        if ((mobs[i].x - 1) - playerX >= 1) {
                             mobs[i].x--;
                         }
                     } else if (mobs[i].x < playerX && map[mobs[i].y][mobs[i].x + 1] == null) {
-                        if (mobs[i].x + 1 != playerX) {
+                        if ((mobs[i].x + 1) - playerX <= -1) {
                             mobs[i].x++;
                         }
-                    } else if (mobs[i].y > playerY && map[mobs[i].y - 1][mobs[i].x] == null) {
-                        if (mobs[i].y - 1 != playerY) {
-                            mobs[i].y--;
-                        }
                     } else if (mobs[i].y < playerY && map[mobs[i].y + 1][mobs[i].x] == null) {
-                        if (mobs[i].y + 1 != playerY) {
+                        if ((mobs[i].y + 1) - playerY <= -1) {
                             mobs[i].y++;
                         }
-                    }
-
-                    if (mobs[i] != null) {
-                        if (mobs[i].x == playerX && mobs[i].y == playerY) {
-                            playerHp--;
+                    } else if (mobs[i].y > playerY && map[mobs[i].y - 1][mobs[i].x] == null) {
+                        if ((mobs[i].y - 1) - playerY >= 1) {
+                            mobs[i].y--;
                         }
                     }
+
+                    if (mobs[i].x - playerX > -2 && mobs[i].x - playerX < 2 && mobs[i].y - playerY > -2
+                            && mobs[i].y < 2) {
+                        playerHp--;
+                    }
+
                 }
             }
-
         }
     }
 
@@ -206,16 +188,6 @@ public class CavedMain {
         String instruction;
         instruction = inputString("");
         instruction = instruction.toUpperCase();
-
-        /*
-        
-        To add an if statement put this sequence after the last condition
-        
-         if (instruction.equals("")) {
-        
-        } else
-        
-         */
 
         // interacting / crafting
         if (instruction.charAt(0) == 'R') {
@@ -303,9 +275,9 @@ public class CavedMain {
             if (suffix.equals("R")) {
                 damage(1, 0);
             } else if (suffix.equals("U")) {
-                damage(0, 1);
-            } else if (suffix.equals("D")) {
                 damage(0, -1);
+            } else if (suffix.equals("D")) {
+                damage(0, 1);
             } else if (suffix.equals("L")) {
                 damage(-1, 0);
             } else {
@@ -569,9 +541,6 @@ public class CavedMain {
         int highY = (chunkY + 1) * 9 - 1 - borderOffset;
         int lowY = (chunkY + 1) * 9 - 9 + borderOffset;
 
-        // System.out.println(highX + " " + lowX);
-        // System.out.println(highY + " " + lowY);
-
         if (playerX + x >= lowX && playerX + x <= highX) {
             // if within bounds of chunk move normally
             playerX = playerX + x;
@@ -625,8 +594,6 @@ public class CavedMain {
 
     // print current chunk
     public static void printChunk(BlockData[][] chunk, String backgroundColor, int chunkX, int chunkY) {
-        // System.out.println(caveIn);
-
         for (int y = (((chunkY + 1) * 9) - 9); y <= (((chunkY + 1) * 9) - 1); y++) {
             System.out.print("[|      ");
             for (int x = (((chunkX + 1) * 9) - 9); x <= (((chunkX + 1) * 9) - 1); x++) {
