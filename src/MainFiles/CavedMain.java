@@ -103,7 +103,7 @@ public class CavedMain {
     static int spawnX = playerX;
     static int spawnY = playerY;
 
-    static MobData[][] mobs = new MobData[size][size];
+    static MobData[] mobs = new MobData[size];
 
     public static int posToChunk(int pos) {
         return pos / 9;
@@ -125,74 +125,64 @@ public class CavedMain {
     public static void main(String[] args) {
         map = genMap(size);
         genMobs(size);
-        // BlockData[][][] caves = new BlockData[amount[3]][9][9];
-        // System.out.println(amount[3]);
-        // caves = genCaves(caves);
-        // printMap(map);
         System.out.println("Type 'help' for help menu");
         while (run) {
             moveMobs();
             topUI();
-            if (inCave) {
-                // printChunk(caves[caveIn], "\u001B[37m", 0, 0);
-            } else {
-                printChunk(map, "\u001B[32m", chunkX, chunkY);
-            }
+            printChunk(map, "\u001B[32m", chunkX, chunkY);
             bottomUI();
-            if (inCave) {
-                // caves[caveIn] = userInput(caves[caveIn]);
-            } else {
-                map = userInput(map);
-            }
-
-            // System.out.print("\033[H\033[2J");
-            // System.out.flush();
-
-            /*
-            for (int i = 0; i < caves.length; i++) {
-                for (int j = 0; j < caves[i].length; j++) {
-                    for (int k = 0; k < caves[i][j].length; k++) {
-                        System.out.println(caves[i][j][k]);
-                    }
-                }
-            }
-            
-            for (int i = 0; i < map.length; i++) {
-                System.out.println(map[i]);
-            }
-            */
+            map = userInput(map);
+            checkPlayerHealth();
         }
         input.close();
     }
 
+    public static void checkPlayerHealth() {
+        if (playerHp <= 0) {
+            System.out.println("You died.");
+
+            playerX = spawnX;
+            playerY = spawnY;
+            for (int i = 0; i < inv.length; i++) {
+                inv[i] = inv[i] / 5;
+            }
+            playerHp = 3;
+        }
+    }
+
     public static void moveMobs() {
-        for (int y = 0; y < mobs.length; y++) {
-            for (int x = 0; x < mobs[y].length; x++) {
-                if (mobs[y][x] != null) {
-                    if (mobs[y][x].x > playerX && map[mobs[y][x].y][mobs[y][x].x - 1] == null) {
-                        //mobs[y][x] = mobs[y][x - 1];
-                        mobs[y][x].x--;
+        if (randomBool(0, 5)) {
+            for (int i = 0; i < mobs.length; i++) {
+                if (mobs[i] != null) {
+                    if (mobs[i].x > playerX && map[mobs[i].y][mobs[i].x - 1] == null) {
+                        mobs[i].x--;
+                    } else if (mobs[i].x < playerX && map[mobs[i].y][mobs[i].x + 1] == null) {
+                        mobs[i].x++;
+                    } else if (mobs[i].y > playerY && map[mobs[i].y - 1][mobs[i].x] == null) {
+                        mobs[i].y--;
+                    } else if (mobs[i].y < playerY && map[mobs[i].y + 1][mobs[i].x] == null) {
+                        mobs[i].y++;
                     }
-                    if (mobs[y][x].x < playerX && map[mobs[y][x].y][mobs[y][x].x + 1] == null) {
-                        mobs[y][x].x++;
+
+                    if (mobs[i].health <= 0) {
+                        mobs[i] = null;
                     }
-                    if (mobs[y][x].y > playerY && map[mobs[y][x].y - 1][mobs[y][x].x] == null) {
-                        mobs[y][x].y--;
-                    }
-                    if (mobs[y][x].y < playerY && map[mobs[y][x].y + 1][mobs[y][x].x] == null) {
-                        mobs[y][x].y++;
+
+                    if (mobs[i] != null) {
+                        if (mobs[i].x == playerX && mobs[i].y == playerY) {
+                            playerHp--;
+                        }
                     }
                 }
             }
+
         }
     }
 
     public static void genMobs(int size) {
-        for (int i = 0; i < size; i++) {
-            int x = randomInt(0, size);
-            int y = randomInt(0, size);
-            if (mobs[y][x] == null) {
-                mobs[y][x] = new MobData(2, x, y);
+        for (int i = 0; i < mobs.length; i++) {
+            if (mobs[i] == null) {
+                mobs[i] = new MobData(2, randomInt(0, size), randomInt(0, size));
             }
             // System.out.println(mobs[y][x].x + " " + mobs[y][x].y);
         }
@@ -292,6 +282,23 @@ public class CavedMain {
             }
         }
 
+        // killing
+
+        if (instruction.charAt(0) == 'K') {
+            String suffix = instruction.substring(1, instruction.length());
+            if (suffix.equals("R")) {
+                damage(1, 0);
+            } else if (suffix.equals("U")) {
+                damage(0, 1);
+            } else if (suffix.equals("D")) {
+                damage(0, -1);
+            } else if (suffix.equals("L")) {
+                damage(-1, 0);
+            } else {
+                damage(0, 0);
+            }
+        }
+
         // inv checker
         if (instruction.equals("INV")) {
             for (int i = 0; i < inv.length; i++) {
@@ -387,6 +394,17 @@ public class CavedMain {
         return map;
     }
 
+    public static boolean tryMob(int x, int y) {
+        for (int i = 0; i < mobs.length; i++) {
+            if (mobs[i] != null) {
+                if (mobs[i].x == x && mobs[i].y == y) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public static BlockData[][] interact(int x, int y, BlockData[][] map) {
         if (map[playerY + y][playerX + x] != null) {
             if (map[playerY + y][playerX + x].id == 2) {
@@ -440,17 +458,6 @@ public class CavedMain {
                 } else {
                     System.out.println(item + "could not be crafted.");
                 }
-            } else if (map[playerY + y][playerX + x].id == 3) {
-                /*
-                caveIn = map[playerY + y][playerX + x].num;
-                tempChunkX = chunkX;
-                tempChunkY = chunkY;
-                enterX = playerX;
-                enterY = playerY;
-                inCave = true;
-                playerX = 4;
-                playerY = 4;
-                */
             } else if (map[playerY + y][playerX + x].id == 5) {
                 spawnX = map[playerY + y][playerX + x].x;
                 spawnY = map[playerY + y][playerX + x].y;
@@ -590,12 +597,14 @@ public class CavedMain {
                     System.out.print(charColors[map[y][x].id] + chars[map[y][x].id] + " " + reset);
                 } else if (y == playerY && x == playerX) {
                     System.out.print(playerC + "P " + reset);
-                } else if (mobs[y][x] != null) {
+                } else if (tryMob(x, y)) {
                     System.out.print(mobC + "M " + reset);
                 } else {
                     System.out.print("\u001B[32m" + "O " + reset);
                 }
+
             }
+
             System.out.println("");
         }
     }
@@ -603,6 +612,7 @@ public class CavedMain {
     // print current chunk
     public static void printChunk(BlockData[][] chunk, String backgroundColor, int chunkX, int chunkY) {
         // System.out.println(caveIn);
+
         for (int y = (((chunkY + 1) * 9) - 9); y <= (((chunkY + 1) * 9) - 1); y++) {
             System.out.print("[|      ");
             for (int x = (((chunkX + 1) * 9) - 9); x <= (((chunkX + 1) * 9) - 1); x++) {
@@ -610,14 +620,29 @@ public class CavedMain {
                     System.out.print(charColors[chunk[y][x].id] + chars[chunk[y][x].id] + " " + reset);
                 } else if (y == playerY && x == playerX) {
                     System.out.print(playerC + "P " + reset);
-                } else if (mobs[y][x] != null) {
+                } else if (tryMob(x, y)) {
                     System.out.print(mobC + "M " + reset);
                 } else {
+
                     System.out.print(backgroundColor + "O " + reset);
                 }
             }
             System.out.print("     |]");
             System.out.println("");
+        }
+    }
+
+    // damage
+    public static void damage(int x, int y) {
+        for (int i = 0; i < mobs.length; i++) {
+            if (playerX + x == mobs[i].x && playerY + y == mobs[i].y) {
+                if (checkTool(0)) {
+                    mobs[i].health = 0;
+                } else {
+                    mobs[i].health--;
+                    System.out.println("That mob has " + mobs[i].health + "hp left");
+                }
+            }
         }
     }
 
@@ -632,6 +657,9 @@ public class CavedMain {
             System.out.print("[" + health + "<3" + reset + "]");
         }
 
+        if (playerHp < 0) {
+            playerHp = 0;
+        }
         // prints empty hearts
         if (playerHp < 3) {
             for (int i = 0; i < 3 - playerHp; i++) {
@@ -693,16 +721,16 @@ public class CavedMain {
             if (id % 17 == 0) {
                 if (y - 1 >= 0 && y + 1 < size && x - 1 >= 0 && x + 1 < size) {
                     // i know this is terrible code dont bug me about it
-                    if (randomBool()) {
+                    if (randomBool(0, 2)) {
                         map[y + 1][x + 1] = new BlockData(4, x + 1, y + 1, 4, amount[4]++);
                     }
-                    if (randomBool()) {
+                    if (randomBool(0, 2)) {
                         map[y + 1][x - 1] = new BlockData(4, x - 1, y + 1, 4, amount[4]++);
                     }
-                    if (randomBool()) {
+                    if (randomBool(0, 2)) {
                         map[y - 1][x + 1] = new BlockData(4, x + 1, y - 1, 4, amount[4]++);
                     }
-                    if (randomBool()) {
+                    if (randomBool(0, 2)) {
                         map[y - 1][x - 1] = new BlockData(4, x - 1, y - 1, 4, amount[4]++);
                     }
                     map[y + 1][x] = new BlockData(4, x, y + 1, 4, amount[4]++);
@@ -752,8 +780,8 @@ public class CavedMain {
         return rndInt;
     }
 
-    public static boolean randomBool() {
-        if (randomInt(0, 2) == 1) {
+    public static boolean randomBool(int min, int max) {
+        if (randomInt(min, max) == 1) {
             return true;
         } else {
             return false;
