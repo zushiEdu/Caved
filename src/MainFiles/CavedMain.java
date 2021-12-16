@@ -10,26 +10,12 @@ import java.util.Scanner;
 public class CavedMain {
 
     /*
-        - Make enemies 
-            - if delta is bigger than 5 dont find player
-            - when player not found pick a random place on the map to move to
-            - if player found at any point go to player and cause damage when beside player
-            - have the delta of x and y of player become which moves go next
-            - if both deltas the same go down
-            - whichever delta is bigger go that way
-            - this creates super pathfinding
-            - eventually make enemies not able to move through blocks
-            - if somehow the enemy moves onto the same place as the player make the player die
         - Make world save & load
             - save to editable file
-            - text file has cd data stored, player inventory stored and enemy data saved
             - save to save to to file located in documents with name specified
             - load to load that file located in documents with name specified
-        - Change characters on screen to easier to read characters
-            - search through ascii tables for this
     
         Short form version
-        - Monsters
         - Save / Loading
         - GUI?
      */
@@ -52,11 +38,6 @@ public class CavedMain {
     static String mobC = "\u001B[31m";
 
     static BlockData bound = new BlockData(5, 0, 0, 1, amount[5]++);
-
-    static boolean inCave;
-    static int enterX;
-    static int enterY;
-    static int caveIn = 0;
 
     static int tempChunkX;
     static int tempChunkY;
@@ -105,7 +86,7 @@ public class CavedMain {
     }
 
     public static void main(String[] args) {
-        map = genMap(size);
+        // map = genMap(size);
         genMobs(size);
         System.out.println("Type 'help' for help menu");
         while (run) {
@@ -136,6 +117,7 @@ public class CavedMain {
     }
 
     public static void moveMobs() {
+        // removes any dead monsters
         for (int i = 0; i < mobs.length; i++) {
             if (mobs[i] != null) {
                 if (mobs[i].health <= 0) {
@@ -143,38 +125,43 @@ public class CavedMain {
                 }
             }
         }
+        // moves mobs while no block is in the way
         for (int i = 0; i < mobs.length; i++) {
-            if (randomBool(0, 4)) {
-
-                if (mobs[i] != null) {
-                    if (mobs[i].x > playerX && map[mobs[i].y][mobs[i].x - 1] == null) {
-                        if ((mobs[i].x - 1) - playerX >= 1) {
-                            mobs[i].x--;
-                        }
-                    } else if (mobs[i].x < playerX && map[mobs[i].y][mobs[i].x + 1] == null) {
-                        if ((mobs[i].x + 1) - playerX <= -1) {
-                            mobs[i].x++;
-                        }
-                    } else if (mobs[i].y < playerY && map[mobs[i].y + 1][mobs[i].x] == null) {
-                        if ((mobs[i].y + 1) - playerY <= -1) {
-                            mobs[i].y++;
-                        }
-                    } else if (mobs[i].y > playerY && map[mobs[i].y - 1][mobs[i].x] == null) {
-                        if ((mobs[i].y - 1) - playerY >= 1) {
-                            mobs[i].y--;
-                        }
+            if (mobs[i] != null) {
+                if (randomBool(0, 4) && mobs[i].x > playerX && map[mobs[i].y][mobs[i].x - 1] == null) {
+                    if ((mobs[i].x - 1) - playerX >= 1) {
+                        mobs[i].x--;
                     }
-
-                    if (mobs[i].x - playerX > -2 && mobs[i].x - playerX < 2 && mobs[i].y - playerY > -2
-                            && mobs[i].y < 2) {
-                        playerHp--;
-                    }
-
                 }
+                if (randomBool(0, 4) && mobs[i].x < playerX && map[mobs[i].y][mobs[i].x + 1] == null) {
+                    if ((mobs[i].x + 1) - playerX <= -1) {
+                        mobs[i].x++;
+                    }
+                }
+                if (randomBool(0, 4) && mobs[i].y < playerY && map[mobs[i].y + 1][mobs[i].x] == null) {
+                    if ((mobs[i].y + 1) - playerY <= -1) {
+                        mobs[i].y++;
+                    }
+                }
+                if (randomBool(0, 4) && mobs[i].y > playerY && map[mobs[i].y - 1][mobs[i].x] == null) {
+                    if ((mobs[i].y - 1) - playerY >= 1) {
+                        mobs[i].y--;
+                    }
+                }
+
+                // damage player if in a 1 wide boundry around the monster
+                System.out.println((mobs[i].x - playerX) + " " + (mobs[i].y - playerY));
+                if (randomBool(0, 4) && mobs[i].x - playerX >= -1 && mobs[i].x - playerX <= 1
+                        && mobs[i].y - playerY <= 1
+                        && mobs[i].y - playerY >= -1) {
+                    playerHp--;
+                }
+
             }
         }
     }
 
+    // place mobs around the map
     public static void genMobs(int size) {
         for (int i = 0; i < mobs.length; i++) {
             if (mobs[i] == null) {
@@ -184,6 +171,7 @@ public class CavedMain {
         }
     }
 
+    // get any possible user input
     public static BlockData[][] userInput(BlockData[][] map) {
         String instruction;
         instruction = inputString("");
@@ -214,26 +202,15 @@ public class CavedMain {
         }
 
         // movement
-        if (inCave) {
-            if (instruction.equals("W")) {
-                move(0, -1, 1);
-            } else if (instruction.equals("A")) {
-                move(-1, 0, 1);
-            } else if (instruction.equals("S")) {
-                move(0, 1, 1);
-            } else if (instruction.equals("D")) {
-                move(1, 0, 1);
-            }
-        } else {
-            if (instruction.equals("W")) {
-                move(0, -1, 0);
-            } else if (instruction.equals("A")) {
-                move(-1, 0, 0);
-            } else if (instruction.equals("S")) {
-                move(0, 1, 0);
-            } else if (instruction.equals("D")) {
-                move(1, 0, 0);
-            }
+
+        if (instruction.equals("W")) {
+            move(0, -1, 0);
+        } else if (instruction.equals("A")) {
+            move(-1, 0, 0);
+        } else if (instruction.equals("S")) {
+            move(0, 1, 0);
+        } else if (instruction.equals("D")) {
+            move(1, 0, 0);
         }
 
         // mining
@@ -280,6 +257,14 @@ public class CavedMain {
                 damage(0, 1);
             } else if (suffix.equals("L")) {
                 damage(-1, 0);
+            } else if (suffix.equals("UR")) {
+                damage(1, -1);
+            } else if (suffix.equals("DR")) {
+                damage(1, 1);
+            } else if (suffix.equals("DL")) {
+                damage(-1, -1);
+            } else if (suffix.equals("UL")) {
+                damage(-1, 1);
             } else {
                 damage(0, 0);
             }
@@ -290,15 +275,6 @@ public class CavedMain {
             for (int i = 0; i < inv.length; i++) {
                 System.out.println(inv[i] + "" + chars[i] + " ");
             }
-        }
-
-        // exit cave
-        if (instruction.equals("R") && inCave) {
-            inCave = false;
-            playerX = enterX;
-            playerY = enterY;
-            chunkX = tempChunkX;
-            chunkY = tempChunkY;
         }
 
         // map print
@@ -321,6 +297,7 @@ public class CavedMain {
             genMap(size);
         }
 
+        // help menu
         if (instruction.equals("HELP")) {
             System.out.println("");
             System.out.println("--- Help Menu ---");
@@ -359,6 +336,7 @@ public class CavedMain {
             }
         }
 
+        // teleport to spawn
         if (instruction.equals("X")) {
             if (map[spawnY][spawnX] != null) {
                 if (map[spawnY][spawnX].id == 5) {
@@ -380,6 +358,7 @@ public class CavedMain {
         return map;
     }
 
+    // test if a mob is in a location
     public static boolean tryMob(int x, int y) {
         for (int i = 0; i < mobs.length; i++) {
             if (mobs[i] != null) {
@@ -391,9 +370,11 @@ public class CavedMain {
         return false;
     }
 
+    // interaction with blocks
     public static BlockData[][] interact(int x, int y, BlockData[][] map) {
         if (map[playerY + y][playerX + x] != null) {
             if (map[playerY + y][playerX + x].id == 2) {
+                // crafting
                 // the item to the offset space is a crafting bench
                 System.out.println("What item do you want to craft?");
                 System.out.println("1. Dirt Cake 'dirt', 1 dirt");
@@ -445,6 +426,7 @@ public class CavedMain {
                     System.out.println(item + "could not be crafted.");
                 }
             } else if (map[playerY + y][playerX + x].id == 5) {
+                // interacting with bed
                 spawnX = map[playerY + y][playerX + x].x;
                 spawnY = map[playerY + y][playerX + x].y;
                 System.out.println("Spawn point set.");
@@ -456,6 +438,7 @@ public class CavedMain {
         return map;
     }
 
+    // placing of blocks
     public static BlockData[][] placeBlock(int x, int y, BlockData[][] map) {
         System.out.println("What block do you want to place?");
         System.out.println("1. For wood enter 0, Amount: " + inv[0]);
@@ -480,6 +463,7 @@ public class CavedMain {
         return map;
     }
 
+    // check if a tool is present in inventory
     public static boolean checkTool(int id) {
         for (int i = 0; i < tb.length; i++) {
             if (ct[id].equals(tb[i])) {
@@ -489,6 +473,7 @@ public class CavedMain {
         return false;
     }
 
+    // mine blocks
     public static BlockData[][] mineBlock(int x, int y, BlockData[][] map) {
         if (map[playerY + y][playerX + x] == null) {
             return map;
@@ -519,6 +504,7 @@ public class CavedMain {
         return map;
     }
 
+    // check if a block in a given location exists
     public static boolean checkBlock(int x, int y, BlockData[][] map) {
         if (map[y][x] != null) {
             return true;
@@ -530,11 +516,6 @@ public class CavedMain {
     public static void move(int x, int y, int borderOffset) {
         // subtract offset to high values
         // add offset to low values
-
-        if (inCave) {
-            chunkX = 0;
-            chunkY = 0;
-        }
         int highX = (chunkX + 1) * 9 - 1 - borderOffset;
         int lowX = (chunkX + 1) * 9 - 9 + borderOffset;
 
@@ -544,30 +525,28 @@ public class CavedMain {
         if (playerX + x >= lowX && playerX + x <= highX) {
             // if within bounds of chunk move normally
             playerX = playerX + x;
-        } else if (!inCave) {
-            if (playerX == lowX || playerX == highX) {
-                // if at edge of chunk check if not at edge of map
-                // if not at map offset chunk and player
-                if (chunkX + x >= 0 && chunkX + x <= (size / 9) - 1) {
-                    chunkX = chunkX + x;
-                    playerX = playerX + x;
-                }
+        } else if (playerX == lowX || playerX == highX) {
+            // if at edge of chunk check if not at edge of map
+            // if not at map offset chunk and player
+            if (chunkX + x >= 0 && chunkX + x <= (size / 9) - 1) {
+                chunkX = chunkX + x;
+                playerX = playerX + x;
             }
+
         }
 
         if (playerY + y <= highY && playerY + y >= lowY) {
             // if within bounds of chunk move normally
             playerY = playerY + y;
-        } else if (!inCave) {
-            if (playerY == lowY || playerY == highY) {
-                // if at edge of chunk check if not at edge of map
-                // if not at map offset chunk and player
-                if (chunkY + y <= (size / 9) - 1 && chunkY + y >= 0) {
-                    chunkY = chunkY + y;
-                    playerY = playerY + y;
-                }
+        } else if (playerY == lowY || playerY == highY) {
+            // if at edge of chunk check if not at edge of map
+            // if not at map offset chunk and player
+            if (chunkY + y <= (size / 9) - 1 && chunkY + y >= 0) {
+                chunkY = chunkY + y;
+                playerY = playerY + y;
             }
         }
+
     }
 
     // map and user interface methods
@@ -613,7 +592,7 @@ public class CavedMain {
         }
     }
 
-    // damage
+    // damage mob if at given position of player
     public static void damage(int x, int y) {
         for (int i = 0; i < mobs.length; i++) {
             if (mobs[i] != null) {
@@ -735,23 +714,6 @@ public class CavedMain {
         }
 
         return map;
-    }
-
-    // generate the caves
-    public static BlockData[][][] genCaves(BlockData[][][] cave) {
-        for (int n = 0; n < amount[3]; n++) {
-            // for each cave apply the template
-
-            // cave[n] = caveTemplate;
-
-            /*
-            int x = randomInt(1, 8);
-            int y = randomInt(1, 8);
-            cave[n][y][x] = new BlockData(4, x, y, 5, amount[4]++);
-            */
-        }
-
-        return cave;
     }
 
     // general purpose methods
