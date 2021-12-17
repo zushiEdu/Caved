@@ -1,5 +1,6 @@
 package MainFiles;
 
+import java.util.InputMismatchException;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -830,10 +831,15 @@ public class CavedMain {
 
     // input a message, get back an int
     public static int inputInt(String message) {
+        int num = 0;
         if (message != "") {
             System.out.println(message);
         }
-        int num = input.nextInt();
+        try {
+            num = input.nextInt();
+
+        } catch (InputMismatchException a) {
+        }
         return num;
     }
 
