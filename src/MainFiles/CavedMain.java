@@ -3,6 +3,9 @@ package MainFiles;
 import java.util.Random;
 import java.util.Scanner;
 
+import java.nio.ReadOnlyBufferException;
+import java.io.*;
+
 /**
  *
  * @author Ethan
@@ -28,7 +31,7 @@ public class CavedMain {
     // map related variables
     static String[] ct = { "AX", "SH", "AX", null, "PI", "AX" };
     static String[] chars = { "W", "D", "C", "V", "S", "B" };
-    static int[] amount = { 100, 0, 0, 0, 0, 0 };
+    static int[] amount = { 0, 0, 0, 0, 0, 0 };
     static String[] charColors = { "\u001B[33m", "\u001B[33m", "\u001B[34m", "\u001B[37m", "\u001B[37m", "\u001B[30m" };
     static Boolean[] breakable = { true, true, true, false, true, true };
     static String reset = "\u001B[0m";
@@ -36,8 +39,6 @@ public class CavedMain {
     static String health = "\u001B[31m";
 
     static String mobC = "\u001B[31m";
-
-    static BlockData bound = new BlockData(5, 0, 0, 1, amount[5]++);
 
     static int tempChunkX;
     static int tempChunkY;
@@ -68,6 +69,86 @@ public class CavedMain {
 
     static MobData[] mobs = new MobData[size];
 
+    public static BlockData[][] read(String name) {
+        BlockData[][] readMap = new BlockData[size][size];
+        try {
+            // creates reader
+            FileReader reader = new FileReader(name);
+
+            File file = new File(name);
+            // creates character array of text file with text file length
+            char[] c = new char[(int) file.length()];
+
+            // read file to character array and convert to string
+            reader.read(c);
+            String a = new String(c);
+
+            // split file at spaces to isolate blocks
+            String spl[] = a.split(" ");
+
+            // remove any empty values in map
+            for (int i = 0; i < spl.length; i++) {
+                if (spl[i].contains("e") || spl[i].isEmpty()) {
+                    spl[i] = null;
+                }
+            }
+
+            // search through map, while ignoring empty blocks
+            for (int i = 0; i < spl.length; i++) {
+                if (!(spl[i] == null)) {
+                    // split blocks with values between commas
+                    String mod[] = spl[i].split(",");
+                    // send each number into their corrosponding spot in a new block
+                    int id = Integer.parseInt(mod[0].trim());
+                    int x = Integer.parseInt(mod[1].trim());
+                    int y = Integer.parseInt(mod[2].trim());
+                    // set block to corrosponding position in the readMap
+                    BlockData block = new BlockData(id, x, y, 2, amount[id]--);
+                    readMap[y][x] = block;
+                }
+            }
+
+            reader.close();
+            // land of error destruction
+        } catch (IOException a) {
+        } catch (NullPointerException b) {
+        } catch (ReadOnlyBufferException c) {
+        } catch (NumberFormatException d) {
+        }
+
+        // return the read map
+        return readMap;
+    }
+
+    public static void save(BlockData[][] mapData, String name) {
+        // create a new empty file with given file name
+        File save = new File(name);
+
+        try {
+            // try to save the given map to the file in zmf format
+            save.createNewFile();
+
+            FileWriter writer = new FileWriter(save);
+
+            for (int y = 0; y < mapData.length; y++) {
+                for (int x = 0; x < mapData[y].length; x++) {
+                    if (mapData[y][x] != null) {
+                        writer.write(
+                                mapData[y][x].id + "," + mapData[y][x].x + "," + mapData[y][x].y + " ");
+                    } else {
+                        writer.write("e ");
+                    }
+
+                }
+                writer.write("\n");
+            }
+            writer.flush();
+            writer.close();
+            // error destruction
+        } catch (IOException e) {
+        }
+    }
+
     public static int posToChunk(int pos) {
         return pos / 9;
     }
@@ -86,9 +167,12 @@ public class CavedMain {
     }
 
     public static void main(String[] args) {
-        // map = genMap(size);
+        map = genMap(size);
         genMobs(size);
         System.out.println("Type 'help' for help menu");
+
+        // save(map, "map.emf");
+        // printChunk(read("map.emf"), "\u001B[32m", chunkX, chunkY);
         while (run) {
             moveMobs();
             topUI();
@@ -150,7 +234,7 @@ public class CavedMain {
                 }
 
                 // damage player if in a 1 wide boundry around the monster
-                System.out.println((mobs[i].x - playerX) + " " + (mobs[i].y - playerY));
+                // System.out.println((mobs[i].x - playerX) + " " + (mobs[i].y - playerY));
                 if (randomBool(0, 4) && mobs[i].x - playerX >= -1 && mobs[i].x - playerX <= 1
                         && mobs[i].y - playerY <= 1
                         && mobs[i].y - playerY >= -1) {
@@ -353,6 +437,18 @@ public class CavedMain {
                 chunkY = posToChunk(centerPlayer(size));
             }
 
+        }
+
+        // save / load
+        if (instruction.equals("SAVE") || instruction.equals("WRITE")) {
+            String fileName = inputString("Enter desired name of save");
+            System.out.println("Saving...");
+            save(map, fileName + ".emf");
+        }
+        if (instruction.equals("LOAD") || instruction.equals("READ")) {
+            String fileName = inputString("Enter desired name to read from");
+            System.out.println("Loading...");
+            map = read(fileName + ".emf");
         }
 
         return map;
@@ -573,23 +669,28 @@ public class CavedMain {
 
     // print current chunk
     public static void printChunk(BlockData[][] chunk, String backgroundColor, int chunkX, int chunkY) {
-        for (int y = (((chunkY + 1) * 9) - 9); y <= (((chunkY + 1) * 9) - 1); y++) {
-            System.out.print("[|      ");
-            for (int x = (((chunkX + 1) * 9) - 9); x <= (((chunkX + 1) * 9) - 1); x++) {
-                if (map[y][x] != null) {
-                    System.out.print(charColors[chunk[y][x].id] + chars[chunk[y][x].id] + " " + reset);
-                } else if (y == playerY && x == playerX) {
-                    System.out.print(playerC + "P " + reset);
-                } else if (tryMob(x, y)) {
-                    System.out.print(mobC + "M " + reset);
-                } else {
+        try {
+            for (int y = (((chunkY + 1) * 9) - 9); y <= (((chunkY + 1) * 9) - 1); y++) {
+                System.out.print("[|      ");
+                for (int x = (((chunkX + 1) * 9) - 9); x <= (((chunkX + 1) * 9) - 1); x++) {
+                    if (chunk[y][x] != null) {
+                        System.out.print(charColors[chunk[y][x].id] + chars[chunk[y][x].id] + " " + reset);
+                    } else if (y == playerY && x == playerX) {
+                        System.out.print(playerC + "P " + reset);
+                    } else if (tryMob(x, y)) {
+                        System.out.print(mobC + "M " + reset);
+                    } else {
 
-                    System.out.print(backgroundColor + "O " + reset);
+                        System.out.print(backgroundColor + "O " + reset);
+                    }
                 }
+                System.out.print("     |]");
+                System.out.println("");
             }
-            System.out.print("     |]");
-            System.out.println("");
+        } catch (NullPointerException a) {
+            a.printStackTrace();
         }
+
     }
 
     // damage mob if at given position of player
