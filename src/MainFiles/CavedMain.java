@@ -171,8 +171,8 @@ public class CavedMain {
         genMobs(size);
         System.out.println("Type 'help' for help menu");
 
-        // save(map, "map.emf");
-        // printChunk(read("map.emf"), "\u001B[32m", chunkX, chunkY);
+        // save(map, "map.txt");
+        // printChunk(read("map.txt"), "\u001B[32m", chunkX, chunkY);
         while (run) {
             moveMobs();
             topUI();
@@ -443,12 +443,12 @@ public class CavedMain {
         if (instruction.equals("SAVE") || instruction.equals("WRITE")) {
             String fileName = inputString("Enter desired name of save");
             System.out.println("Saving...");
-            save(map, fileName + ".emf");
+            save(map, fileName + ".txt");
         }
         if (instruction.equals("LOAD") || instruction.equals("READ")) {
             String fileName = inputString("Enter desired name to read from");
             System.out.println("Loading...");
-            map = read(fileName + ".emf");
+            map = read(fileName + ".txt");
         }
 
         return map;
