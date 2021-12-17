@@ -13,13 +13,7 @@ import java.io.*;
 public class CavedMain {
 
     /*
-        - Make world save & load
-            - save to editable file
-            - save to save to to file located in documents with name specified
-            - load to load that file located in documents with name specified
-    
         Short form version
-        - Save / Loading
         - GUI?
      */
 
