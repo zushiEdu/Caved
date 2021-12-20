@@ -342,12 +342,12 @@ public class CavedMain {
         if (instruction.equals("SAVE") || instruction.equals("WRITE")) {
             String fileName = inputString("Enter desired name of save");
             System.out.println("Saving...");
-            save(map, fileName + ".txt");
+            saveMap(map, fileName + ".txt");
         }
         if (instruction.equals("LOAD") || instruction.equals("READ")) {
             String fileName = inputString("Enter desired name to read from");
             System.out.println("Loading...");
-            map = read(fileName + ".txt");
+            map = readMap(fileName + ".txt");
         }
 
         return map;
@@ -561,7 +561,7 @@ public class CavedMain {
         return "06/07/20";
     }
 
-    public static void save(BlockData[][] mapData, String name) {
+    public static void saveMap(BlockData[][] mapData, String name) {
         // create a new empty file with given file name
         File save = new File(name);
 
@@ -590,7 +590,7 @@ public class CavedMain {
         }
     }
 
-    public static BlockData[][] read(String name) {
+    public static BlockData[][] readMap(String name) {
         BlockData[][] readMap = new BlockData[size][size];
         try {
             // creates reader
