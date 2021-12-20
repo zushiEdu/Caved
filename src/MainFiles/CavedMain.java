@@ -12,7 +12,6 @@ import java.io.*;
  * @author Ethan
  */
 public class CavedMain {
-
     /*
         Short form version
         - GUI?
@@ -47,9 +46,11 @@ public class CavedMain {
     // general game variables
     static boolean run = true;
 
+    static String setup = message("------ Setup ------");
+
     static int size = inputInt(
             "Enter desired size of map to generate, map will work best if size entered is a multiple of 9");
-    static String secret = generating();
+    static String secret = message("Generating...");
     static BlockData[][] map = new BlockData[size][size];
 
     // general player related variables
@@ -63,103 +64,6 @@ public class CavedMain {
     static int spawnY = playerY;
 
     static MobData[] mobs = new MobData[size];
-
-    public static BlockData[][] read(String name) {
-        BlockData[][] readMap = new BlockData[size][size];
-        try {
-            // creates reader
-            FileReader reader = new FileReader(name);
-
-            File file = new File(name);
-            // creates character array of text file with text file length
-            char[] c = new char[(int) file.length()];
-
-            // read file to character array and convert to string
-            reader.read(c);
-            String a = new String(c);
-
-            // split file at spaces to isolate blocks
-            String spl[] = a.split(" ");
-
-            // remove any empty values in map
-            for (int i = 0; i < spl.length; i++) {
-                if (spl[i].contains("e") || spl[i].isEmpty()) {
-                    spl[i] = null;
-                }
-            }
-
-            // search through map, while ignoring empty blocks
-            for (int i = 0; i < spl.length; i++) {
-                if (!(spl[i] == null)) {
-                    // split blocks with values between commas
-                    String mod[] = spl[i].split(",");
-                    // send each number into their corrosponding spot in a new block
-                    int id = Integer.parseInt(mod[0].trim());
-                    int x = Integer.parseInt(mod[1].trim());
-                    int y = Integer.parseInt(mod[2].trim());
-                    // set block to corrosponding position in the readMap
-                    BlockData block = new BlockData(id, x, y, 2, amount[id]--);
-                    readMap[y][x] = block;
-                }
-            }
-
-            reader.close();
-            // land of error destruction
-        } catch (IOException a) {
-        } catch (NullPointerException b) {
-        } catch (ReadOnlyBufferException c) {
-        } catch (NumberFormatException d) {
-        }
-
-        // return the read map
-        return readMap;
-    }
-
-    public static void save(BlockData[][] mapData, String name) {
-        // create a new empty file with given file name
-        File save = new File(name);
-
-        try {
-            // try to save the given map to the file in zmf format
-            save.createNewFile();
-
-            FileWriter writer = new FileWriter(save);
-
-            for (int y = 0; y < mapData.length; y++) {
-                for (int x = 0; x < mapData[y].length; x++) {
-                    if (mapData[y][x] != null) {
-                        writer.write(
-                                mapData[y][x].id + "," + mapData[y][x].x + "," + mapData[y][x].y + " ");
-                    } else {
-                        writer.write("e ");
-                    }
-
-                }
-                writer.write("\n");
-            }
-            writer.flush();
-            writer.close();
-            // error destruction
-        } catch (IOException e) {
-        }
-    }
-
-    public static int posToChunk(int pos) {
-        return pos / 9;
-    }
-
-    public static int centerPlayer(int size) {
-        if ((size / 9) % 2 == 0) {
-            return (size / 2) + 4;
-        } else {
-            return size / 2;
-        }
-    }
-
-    public static String generating() {
-        System.out.println("Generating...");
-        return "06/07/20";
-    }
 
     public static void main(String[] args) {
         map = genMap(size);
@@ -638,6 +542,103 @@ public class CavedMain {
             }
         }
 
+    }
+
+    public static int posToChunk(int pos) {
+        return pos / 9;
+    }
+
+    public static int centerPlayer(int size) {
+        if ((size / 9) % 2 == 0) {
+            return (size / 2) + 4;
+        } else {
+            return size / 2;
+        }
+    }
+
+    public static String message(String message) {
+        System.out.println(message);
+        return "06/07/20";
+    }
+
+    public static void save(BlockData[][] mapData, String name) {
+        // create a new empty file with given file name
+        File save = new File(name);
+
+        try {
+            // try to save the given map to the file in zmf format
+            save.createNewFile();
+
+            FileWriter writer = new FileWriter(save);
+
+            for (int y = 0; y < mapData.length; y++) {
+                for (int x = 0; x < mapData[y].length; x++) {
+                    if (mapData[y][x] != null) {
+                        writer.write(
+                                mapData[y][x].id + "," + mapData[y][x].x + "," + mapData[y][x].y + " ");
+                    } else {
+                        writer.write("e ");
+                    }
+
+                }
+                writer.write("\n");
+            }
+            writer.flush();
+            writer.close();
+            // error destruction
+        } catch (IOException e) {
+        }
+    }
+
+    public static BlockData[][] read(String name) {
+        BlockData[][] readMap = new BlockData[size][size];
+        try {
+            // creates reader
+            FileReader reader = new FileReader(name);
+
+            File file = new File(name);
+            // creates character array of text file with text file length
+            char[] c = new char[(int) file.length()];
+
+            // read file to character array and convert to string
+            reader.read(c);
+            String a = new String(c);
+
+            // split file at spaces to isolate blocks
+            String spl[] = a.split(" ");
+
+            // remove any empty values in map
+            for (int i = 0; i < spl.length; i++) {
+                if (spl[i].contains("e") || spl[i].isEmpty()) {
+                    spl[i] = null;
+                }
+            }
+
+            // search through map, while ignoring empty blocks
+            for (int i = 0; i < spl.length; i++) {
+                if (!(spl[i] == null)) {
+                    // split blocks with values between commas
+                    String mod[] = spl[i].split(",");
+                    // send each number into their corrosponding spot in a new block
+                    int id = Integer.parseInt(mod[0].trim());
+                    int x = Integer.parseInt(mod[1].trim());
+                    int y = Integer.parseInt(mod[2].trim());
+                    // set block to corrosponding position in the readMap
+                    BlockData block = new BlockData(id, x, y, 2, amount[id]--);
+                    readMap[y][x] = block;
+                }
+            }
+
+            reader.close();
+            // land of error destruction
+        } catch (IOException a) {
+        } catch (NullPointerException b) {
+        } catch (ReadOnlyBufferException c) {
+        } catch (NumberFormatException d) {
+        }
+
+        // return the read map
+        return readMap;
     }
 
     // map and user interface methods
