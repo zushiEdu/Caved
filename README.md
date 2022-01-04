@@ -3,7 +3,7 @@
 
 #### Future features
 
-Full Game Finished
+Game Finished For The Forseeable Future
 
 #### Known Bugs
 No known bugs.
