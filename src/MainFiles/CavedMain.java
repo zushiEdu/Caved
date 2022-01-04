@@ -3,84 +3,100 @@ package MainFiles;
 import java.util.InputMismatchException;
 import java.util.Random;
 import java.util.Scanner;
-
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.ReadOnlyBufferException;
-import java.io.*;
 
 /**
  *
- * @author Ethan
+ *  Runs best in VSCode, netbeans has a slow console
+ *  
+ *  I did play around with drawing and had graphics finished 
+ *  ( no screenshot you'll have to take my word it was quite cool) 
+ *  I didn't like how the game looked and felt at that point
+ * 
+ * @author Ethan Huber
  */
 public class CavedMain {
-    /*
-        Short form version
-        - GUI?
-     */
 
     /**
      * @param args the command line arguments
      */
     static Scanner input = new Scanner(System.in);
 
+    // -- Dev Note --
+    // i am aware of the un-used block found on lines 24-28, i removed barrier blocks used for a deprecated feature
+    // instead of removing the block and changing the id of some other blocks, i kept it for compatability
+    // --------------
     // map related variables
-    static String[] ct = { "AX", "SH", "AX", null, "PI", "AX" };
-    static String[] chars = { "W", "D", "C", "V", "S", "B" };
-    static int[] amount = { 0, 0, 0, 0, 0, 0 };
-    static String[] charColors = { "\u001B[33m", "\u001B[33m", "\u001B[34m", "\u001B[37m", "\u001B[37m", "\u001B[30m" };
-    static Boolean[] breakable = { true, true, true, false, true, true };
-    static String reset = "\u001B[0m";
-    static String playerC = "\u001B[34m";
-    static String health = "\u001B[31m";
-
-    static String mobC = "\u001B[31m";
+    static String[] matchingTools = { "AX", "SH", "AX", null, "PI", "AX" };
+    static String[] blockCharacters = { "W", "D", "C", "V", "S", "B" };
+    static int[] blockAmount = { 0, 0, 0, 0, 0, 0 };
+    static String[] blockColors = { "\u001B[33m", "\u001B[33m", "\u001B[34m", "\u001B[37m", "\u001B[37m",
+            "\u001B[30m" };
+    static Boolean[] breakableBlocks = { true, true, true, false, true, true };
+    static String resetColor = "\u001B[0m";
+    static String playerColor = "\u001B[34m";
+    static String healthColor = "\u001B[31m";
+    static String mobColor = "\u001B[31m";
 
     static int tempChunkX;
     static int tempChunkY;
 
+    static int size;
+
+    static BlockData[][] map;
+    static MobData[] mobs;
+
+    // inventory related variables
+    static String[] toolBar = { "  ", "  ", "  " };
+    static int[] inventory = { 0, 0, 0, 0, 0, 0 };
+    static int inventorySelectorPos = 0;
+
+    // player related variables
     static int playerHp = 3;
-    // inventory player related variables
-    static String[] tb = { "  ", "  ", "  " };
-    static int[] inv = { 99, 0, 0, 0, 0, 0 };
-    static int invPos = 0;
+
+    static int playerX;
+    static int playerY;
+
+    static int chunkX;
+    static int chunkY;
+
+    static int spawnX;
+    static int spawnY;
 
     // general game variables
     static boolean run = true;
 
-    static String setup = message("------ Setup ------");
-
-    static int size = inputInt(
-            "Enter desired size of map to generate, map will work best if size entered is a multiple of 9");
-    static String secret = message("Generating...");
-    static BlockData[][] map = new BlockData[size][size];
-
-    // general player related variables
-    static int playerX = centerPlayer(size);
-    static int playerY = centerPlayer(size);
-
-    static int chunkX = posToChunk(centerPlayer(size));
-    static int chunkY = posToChunk(centerPlayer(size));
-
-    static int spawnX = playerX;
-    static int spawnY = playerY;
-
-    static MobData[] mobs = new MobData[size];
-
     public static void main(String[] args) {
-        map = genMap(size);
-        genMobs(size);
-        System.out.println("Type 'help' for help menu");
-
-        // save(map, "map.txt");
-        // printChunk(read("map.txt"), "\u001B[32m", chunkX, chunkY);
+        setup();
         while (run) {
             moveMobs();
-            topUI();
+            printTopUI();
             printChunk(map, "\u001B[32m", chunkX, chunkY);
-            bottomUI();
-            map = userInput(map);
+            printBottomUI();
+            userInput();
             checkPlayerHealth();
         }
         input.close();
+    }
+
+    public static void setup() {
+        size = inputInt("Enter desired map size, size will work best if multiple of 9");
+        message("Generating...");
+        playerX = centerPlayer(size);
+        playerY = centerPlayer(size);
+        chunkX = posToChunk(centerPlayer(size));
+        chunkY = posToChunk(centerPlayer(size));
+        spawnX = playerX;
+        spawnY = playerY;
+        map = new BlockData[size][size];
+        mobs = new MobData[size];
+        map = genMap(size);
+        genMobs(size);
+        System.out.println("Type 'help' for help menu");
     }
 
     public static void checkPlayerHealth() {
@@ -92,8 +108,8 @@ public class CavedMain {
 
             chunkX = posToChunk(spawnX);
             chunkY = posToChunk(spawnY);
-            for (int i = 0; i < inv.length; i++) {
-                inv[i] = inv[i] / 5;
+            for (int i = 0; i < inventory.length; i++) {
+                inventory[i] = inventory[i] / 5;
             }
             playerHp = 3;
         }
@@ -111,6 +127,7 @@ public class CavedMain {
         // moves mobs while no block is in the way
         for (int i = 0; i < mobs.length; i++) {
             if (mobs[i] != null) {
+                // moves mobs with random chance (1 in 4) while checking which direction it should move in
                 if (randomBool(0, 4) && mobs[i].x > playerX && map[mobs[i].y][mobs[i].x - 1] == null) {
                     if ((mobs[i].x - 1) - playerX >= 1) {
                         mobs[i].x--;
@@ -155,7 +172,7 @@ public class CavedMain {
     }
 
     // get any possible user input
-    public static BlockData[][] userInput(BlockData[][] map) {
+    public static void userInput() {
         String instruction;
         instruction = inputString("");
         instruction = instruction.toUpperCase();
@@ -164,28 +181,27 @@ public class CavedMain {
         if (instruction.charAt(0) == 'R') {
             String subString = instruction.substring(1);
             if (subString.equals("U")) {
-                map = interact(0, -1, map);
+                interact(0, -1);
             } else if (subString.equals("R")) {
-                map = interact(1, 0, map);
+                interact(1, 0);
             } else if (subString.equals("D")) {
-                map = interact(0, 1, map);
+                interact(0, 1);
             } else if (subString.equals("L")) {
-                map = interact(-1, 0, map);
+                interact(-1, 0);
             } else if (subString.equals("I")) {
-                if (inv[0] >= 4) {
-                    inv[2]++;
+                if (inventory[0] >= 4) {
+                    inventory[2]++;
                     System.out.println("Crafting bench crafted");
-                    inv[0] = inv[0] - 4;
+                    inventory[0] = inventory[0] - 4;
                 } else {
                     System.out.println("Not enough wood to make crafting bench");
                 }
             } else if (subString.equals("")) {
-                map = interact(0, 0, map);
+                interact(0, 0);
             }
         }
 
         // movement
-
         if (instruction.equals("W")) {
             move(0, -1, 0);
         } else if (instruction.equals("A")) {
@@ -197,18 +213,18 @@ public class CavedMain {
         }
 
         // mining
-        if (instruction.charAt(0) == 'M') {
+        if (instruction.charAt(0) == 'M' && !instruction.equals("MAP")) {
             String suffix = instruction.substring(1, instruction.length());
             if (suffix.equals("R")) {
-                map = mineBlock(1, 0, map);
+                mineBlock(1, 0);
             } else if (suffix.equals("L")) {
-                map = mineBlock(-1, 0, map);
+                mineBlock(-1, 0);
             } else if (suffix.equals("U")) {
-                map = mineBlock(0, -1, map);
+                mineBlock(0, -1);
             } else if (suffix.equals("D")) {
-                map = mineBlock(0, 1, map);
+                mineBlock(0, 1);
             } else {
-                map = mineBlock(0, 0, map);
+                mineBlock(0, 0);
             }
         }
 
@@ -216,15 +232,15 @@ public class CavedMain {
         if (instruction.charAt(0) == 'P') {
             String suffix = instruction.substring(1, instruction.length());
             if (suffix.equals("R")) {
-                map = placeBlock(1, 0, map);
+                placeBlock(1, 0);
             } else if (suffix.equals("L")) {
-                map = placeBlock(-1, 0, map);
+                placeBlock(-1, 0);
             } else if (suffix.equals("U")) {
-                map = placeBlock(0, -1, map);
+                placeBlock(0, -1);
             } else if (suffix.equals("D")) {
-                map = placeBlock(0, 1, map);
+                placeBlock(0, 1);
             } else {
-                map = placeBlock(0, 0, map);
+                placeBlock(0, 0);
             }
         }
 
@@ -255,8 +271,8 @@ public class CavedMain {
 
         // inv checker
         if (instruction.equals("INV")) {
-            for (int i = 0; i < inv.length; i++) {
-                System.out.println(inv[i] + "" + chars[i] + " ");
+            for (int i = 0; i < inventory.length; i++) {
+                System.out.println(inventory[i] + "" + blockCharacters[i] + " ");
             }
         }
 
@@ -298,6 +314,7 @@ public class CavedMain {
             System.out.println("Regeneration - 'Regen' to regenerate the map");
             System.out.println("Block distribution - 'Sum' to view amounts of each block on the map");
             System.out.println("End game - 'Stop' or 'Exit' to exit / stop game");
+            System.out.println("Press 'X to go back to spawn/bed");
             System.out.println("");
         }
 
@@ -310,12 +327,12 @@ public class CavedMain {
 
         // scrolling of hotbar
         if (instruction.equals("Q")) {
-            if (invPos > 0) {
-                invPos--;
+            if (inventorySelectorPos > 0) {
+                inventorySelectorPos--;
             }
         } else if (instruction.equals("E")) {
-            if (invPos < inv.length - 2) {
-                invPos++;
+            if (inventorySelectorPos < inventory.length - 2) {
+                inventorySelectorPos++;
             }
         }
 
@@ -347,10 +364,8 @@ public class CavedMain {
         if (instruction.equals("LOAD") || instruction.equals("READ")) {
             String fileName = inputString("Enter desired name to read from");
             System.out.println("Loading...");
-            map = readMap(fileName + ".txt");
+            readMap(fileName + ".txt");
         }
-
-        return map;
     }
 
     // test if a mob is in a location
@@ -366,7 +381,7 @@ public class CavedMain {
     }
 
     // interaction with blocks
-    public static BlockData[][] interact(int x, int y, BlockData[][] map) {
+    public static void interact(int x, int y) {
         if (map[playerY + y][playerX + x] != null) {
             if (map[playerY + y][playerX + x].id == 2) {
                 // crafting
@@ -380,42 +395,42 @@ public class CavedMain {
                 String item = inputString("Type name of item in quotation marks to craft");
                 item = item.toUpperCase();
                 if (item.equals("DIRT")) {
-                    if (inv[1] >= 1) {
+                    if (inventory[1] >= 1) {
                         playerHp++;
                         System.out.println("A dirt cake was crafted and consumed");
-                        inv[1]--;
+                        inventory[1]--;
                     } else {
                         System.out.println("Not enough dirt to make dirt cake");
                     }
                 } else if (item.equals("AXE")) {
-                    if (inv[0] >= 2) {
-                        tb[0] = "AX";
+                    if (inventory[0] >= 2) {
+                        toolBar[0] = "AX";
                         System.out.println("An axe was crafted");
-                        inv[0] = inv[0] - 2;
+                        inventory[0] = inventory[0] - 2;
                     } else {
                         System.out.println("Not enough wood to make an axe");
                     }
                 } else if (item.equals("PICKAXE")) {
-                    if (inv[0] >= 3) {
-                        tb[1] = "PI";
+                    if (inventory[0] >= 3) {
+                        toolBar[1] = "PI";
                         System.out.println("A pickaxe was crafted");
-                        inv[0] = inv[0] - 3;
+                        inventory[0] = inventory[0] - 3;
                     } else {
                         System.out.println("Not enough wood to make a pickaxe");
                     }
                 } else if (item.equals("SHOVEL")) {
-                    if (inv[0] >= 1) {
-                        tb[2] = "SH";
+                    if (inventory[0] >= 1) {
+                        toolBar[2] = "SH";
                         System.out.println("A shovel was crafted");
-                        inv[0] = inv[0] - 2;
+                        inventory[0] = inventory[0] - 2;
                     } else {
                         System.out.println("Not enough wood to make a shovel");
                     }
                 } else if (item.equals("BED")) {
-                    if (inv[0] >= 5) {
-                        inv[5]++;
+                    if (inventory[0] >= 5) {
+                        inventory[5]++;
                         System.out.println("A bed was crafted");
-                        inv[0] = inv[0] - 5;
+                        inventory[0] = inventory[0] - 5;
                     }
                 } else {
                     System.out.println(item + "could not be crafted.");
@@ -429,39 +444,36 @@ public class CavedMain {
         } else {
             System.out.println("No interactable here");
         }
-
-        return map;
     }
 
     // placing of blocks
-    public static BlockData[][] placeBlock(int x, int y, BlockData[][] map) {
+    public static void placeBlock(int x, int y) {
         System.out.println("What block do you want to place?");
-        System.out.println("1. For wood enter 0, Amount: " + inv[0]);
-        System.out.println("2. For dirt enter 1, Amount: " + inv[1]);
-        System.out.println("3. For a crafting bench enter 2, Amount: " + inv[2]);
-        System.out.println("4. For stone enter 4, Amount: " + inv[4]);
-        System.out.println("5. For a bed enter 5, Amount: " + inv[5]);
+        System.out.println("1. For wood enter 0, Amount: " + inventory[0]);
+        System.out.println("2. For dirt enter 1, Amount: " + inventory[1]);
+        System.out.println("3. For a crafting bench enter 2, Amount: " + inventory[2]);
+        System.out.println("4. For stone enter 4, Amount: " + inventory[4]);
+        System.out.println("5. For a bed enter 5, Amount: " + inventory[5]);
 
         int block = inputInt("");
 
         // if block to the offset doesnt exist then place block
-        if (!checkBlock(playerX + x, playerY + y, map)) {
+        if (!checkBlock(playerX + x, playerY + y)) {
             // if enough blocks in inv exists
-            if (inv[block] > 0) {
+            if (inventory[block] > 0) {
                 // remove block
-                inv[block]--;
-                map[playerY + y][playerX + x] = new BlockData(block, playerX + x, playerY + y, 3, amount[block]++);
+                inventory[block]--;
+                map[playerY + y][playerX + x] = new BlockData(block, playerX + x, playerY + y, 3, blockAmount[block]++);
             } else {
                 System.out.println("Not enough blocks of that type");
             }
         }
-        return map;
     }
 
     // check if a tool is present in inventory
     public static boolean checkTool(int id) {
-        for (int i = 0; i < tb.length; i++) {
-            if (ct[id].equals(tb[i])) {
+        for (int i = 0; i < toolBar.length; i++) {
+            if (matchingTools[id].equals(toolBar[i])) {
                 return true;
             }
         }
@@ -469,38 +481,37 @@ public class CavedMain {
     }
 
     // mine blocks
-    public static BlockData[][] mineBlock(int x, int y, BlockData[][] map) {
+    public static void mineBlock(int x, int y) {
         if (map[playerY + y][playerX + x] == null) {
-            return map;
+            // do nothing
         }
         int id = map[playerY + y][playerX + x].id;
-        Boolean ct = checkTool(id);
+        Boolean correctTool = checkTool(id);
         int dmg;
-        if (ct) {
+        if (correctTool) {
             dmg = 4;
         } else {
             dmg = 1;
         }
         // if block to the offset exists mine it
 
-        if (checkBlock(playerX + x, playerY + y, map)) {
+        if (checkBlock(playerX + x, playerY + y)) {
             if (map[playerY + y][playerX + x].dur >= 1) {
                 map[playerY + y][playerX + x].dur = map[playerY + y][playerX + x].dur - dmg;
             }
-            if (breakable[map[playerY + y][playerX + x].id] && map[playerY + y][playerX + x].dur <= 0) {
+            if (map[playerY + y][playerX + x].dur <= 0) {
                 // add block id to the right to inventory
-                inv[map[playerY + y][playerX + x].id]++;
+                inventory[map[playerY + y][playerX + x].id]++;
                 // set id of block to the right to null
                 map[playerY + y][playerX + x] = null;
             }
         } else {
             System.out.println("This block is not breakable.");
         }
-        return map;
     }
 
     // check if a block in a given location exists
-    public static boolean checkBlock(int x, int y, BlockData[][] map) {
+    public static boolean checkBlock(int x, int y) {
         if (map[y][x] != null) {
             return true;
         }
@@ -624,7 +635,7 @@ public class CavedMain {
                     int x = Integer.parseInt(mod[1].trim());
                     int y = Integer.parseInt(mod[2].trim());
                     // set block to corrosponding position in the readMap
-                    BlockData block = new BlockData(id, x, y, 2, amount[id]--);
+                    BlockData block = new BlockData(id, x, y, 2, blockAmount[id]--);
                     readMap[y][x] = block;
                 }
             }
@@ -641,20 +652,18 @@ public class CavedMain {
         return readMap;
     }
 
-    // map and user interface methods
-
     // print whole map
     public static void printMap(BlockData[][] map) {
         for (int y = 0; y < map.length; y++) {
             for (int x = 0; x < map[y].length; x++) {
                 if (map[y][x] != null) {
-                    System.out.print(charColors[map[y][x].id] + chars[map[y][x].id] + " " + reset);
+                    System.out.print(blockColors[map[y][x].id] + blockCharacters[map[y][x].id] + " " + resetColor);
                 } else if (y == playerY && x == playerX) {
-                    System.out.print(playerC + "P " + reset);
+                    System.out.print(playerColor + "P " + resetColor);
                 } else if (tryMob(x, y)) {
-                    System.out.print(mobC + "M " + reset);
+                    System.out.print(mobColor + "M " + resetColor);
                 } else {
-                    System.out.print("\u001B[32m" + "O " + reset);
+                    System.out.print("\u001B[32m" + "O " + resetColor);
                 }
 
             }
@@ -670,14 +679,15 @@ public class CavedMain {
                 System.out.print("[|      ");
                 for (int x = (((chunkX + 1) * 9) - 9); x <= (((chunkX + 1) * 9) - 1); x++) {
                     if (chunk[y][x] != null) {
-                        System.out.print(charColors[chunk[y][x].id] + chars[chunk[y][x].id] + " " + reset);
+                        System.out.print(
+                                blockColors[chunk[y][x].id] + blockCharacters[chunk[y][x].id] + " " + resetColor);
                     } else if (y == playerY && x == playerX) {
-                        System.out.print(playerC + "P " + reset);
+                        System.out.print(playerColor + "P " + resetColor);
                     } else if (tryMob(x, y)) {
-                        System.out.print(mobC + "M " + reset);
+                        System.out.print(mobColor + "M " + resetColor);
                     } else {
 
-                        System.out.print(backgroundColor + "O " + reset);
+                        System.out.print(backgroundColor + "O " + resetColor);
                     }
                 }
                 System.out.print("     |]");
@@ -706,14 +716,14 @@ public class CavedMain {
     }
 
     // print top section of user interface
-    public static void topUI() {
+    public static void printTopUI() {
         // prints health tag
 
         System.out.print("[HEA:]");
 
         // prints full hearts
         for (int i = 0; i < playerHp && i < 3; i++) {
-            System.out.print("[" + health + "<3" + reset + "]");
+            System.out.print("[" + healthColor + "<3" + resetColor + "]");
         }
 
         if (playerHp < 0) {
@@ -725,34 +735,58 @@ public class CavedMain {
                 System.out.print("[<>]");
             }
         }
-        System.out.println("[LOC:][00" + playerX + ",00" + playerY + "]");
+
+        String stringPlayerX = playerX + "";
+        String stringPlayerY = playerY + "";
+
+        if (stringPlayerX.length() > 3) {
+            stringPlayerX = stringPlayerX.substring(stringPlayerX.length() - 2, stringPlayerX.length());
+        }
+
+        if (stringPlayerY.length() > 3) {
+            stringPlayerY = stringPlayerY.substring(stringPlayerY.length() - 2, stringPlayerY.length());
+        }
+
+        char[] splitStringPlayerX = stringPlayerX.toCharArray();
+        char[] splitStringPlayerY = stringPlayerY.toCharArray();
+
+        for (int i = 0; i < 3 - splitStringPlayerX.length; i++) {
+            stringPlayerX = '0' + stringPlayerX;
+        }
+
+        for (int i = 0; i < 3 - splitStringPlayerY.length; i++) {
+            stringPlayerY = '0' + stringPlayerY;
+        }
+
+        System.out.println("[LOC:][" + stringPlayerX + "," + stringPlayerY + "]");
         System.out.println("[+----- 1 2 3 4 5 6 7 8 9 -----+]");
         System.out.print("[|                             |]");
         System.out.println("");
     }
 
     // print botton section of user interface
-    public static void bottomUI() {
+    public static void printBottomUI() {
         System.out.println("[|                             |]");
         System.out.println("[+----- 1 2 3 4 5 6 7 8 9 -----+]");
         // prints toolbar and itembar
-        System.out.print("[TO:]" + "[" + tb[0] + "]" + "[" + tb[1] + "]" + "[" + tb[2] + "]" + "[ITE:]" + "[");
+        System.out.print(
+                "[TO:]" + "[" + toolBar[0] + "]" + "[" + toolBar[1] + "]" + "[" + toolBar[2] + "]" + "[ITE:]" + "[");
 
-        String amt0 = inv[invPos] + "";
-        String amt1 = inv[invPos + 1] + "";
+        String amt0 = inventory[inventorySelectorPos] + "";
+        String amt1 = inventory[inventorySelectorPos + 1] + "";
 
-        if (inv[0] < 10) {
-            System.out.print("0" + amt0 + chars[invPos]);
-        } else if (inv[0] >= 10) {
+        if (inventory[0] < 10) {
+            System.out.print("0" + amt0 + blockCharacters[inventorySelectorPos]);
+        } else if (inventory[0] >= 10) {
             amt0 = amt0.substring(amt0.length() - 2, amt0.length());
-            System.out.print(amt0 + chars[invPos]);
+            System.out.print(amt0 + blockCharacters[inventorySelectorPos]);
         }
         System.out.print("][");
-        if (inv[1] < 10) {
-            System.out.print("0" + amt1 + chars[invPos + 1]);
-        } else if (inv[1] >= 10) {
+        if (inventory[1] < 10) {
+            System.out.print("0" + amt1 + blockCharacters[inventorySelectorPos + 1]);
+        } else if (inventory[1] >= 10) {
             amt1 = amt1.substring(amt1.length() - 2, amt1.length());
-            System.out.print(amt1 + chars[invPos + 1]);
+            System.out.print(amt1 + blockCharacters[inventorySelectorPos + 1]);
         }
         System.out.print("]");
         System.out.println("");
@@ -760,8 +794,8 @@ public class CavedMain {
 
     // print map distribution
     public static void printAmount() {
-        for (int i = 0; i < amount.length; i++) {
-            System.out.print(amount[i] + ", ");
+        for (int i = 0; i < blockAmount.length; i++) {
+            System.out.print(blockAmount[i] + ", ");
         }
         System.out.println();
     }
@@ -781,21 +815,21 @@ public class CavedMain {
                 if (y - 1 >= 0 && y + 1 < size && x - 1 >= 0 && x + 1 < size) {
                     // i know this is terrible code dont bug me about it
                     if (randomBool(0, 2)) {
-                        map[y + 1][x + 1] = new BlockData(4, x + 1, y + 1, 4, amount[4]++);
+                        map[y + 1][x + 1] = new BlockData(4, x + 1, y + 1, 4, blockAmount[4]++);
                     }
                     if (randomBool(0, 2)) {
-                        map[y + 1][x - 1] = new BlockData(4, x - 1, y + 1, 4, amount[4]++);
+                        map[y + 1][x - 1] = new BlockData(4, x - 1, y + 1, 4, blockAmount[4]++);
                     }
                     if (randomBool(0, 2)) {
-                        map[y - 1][x + 1] = new BlockData(4, x + 1, y - 1, 4, amount[4]++);
+                        map[y - 1][x + 1] = new BlockData(4, x + 1, y - 1, 4, blockAmount[4]++);
                     }
                     if (randomBool(0, 2)) {
-                        map[y - 1][x - 1] = new BlockData(4, x - 1, y - 1, 4, amount[4]++);
+                        map[y - 1][x - 1] = new BlockData(4, x - 1, y - 1, 4, blockAmount[4]++);
                     }
-                    map[y + 1][x] = new BlockData(4, x, y + 1, 4, amount[4]++);
-                    map[y - 1][x] = new BlockData(4, x, y - 1, 4, amount[4]++);
-                    map[y][x + 1] = new BlockData(4, x + 1, y, 4, amount[4]++);
-                    map[y][x - 1] = new BlockData(4, x - 1, y, 4, amount[4]++);
+                    map[y + 1][x] = new BlockData(4, x, y + 1, 4, blockAmount[4]++);
+                    map[y - 1][x] = new BlockData(4, x, y - 1, 4, blockAmount[4]++);
+                    map[y][x + 1] = new BlockData(4, x + 1, y, 4, blockAmount[4]++);
+                    map[y][x - 1] = new BlockData(4, x - 1, y, 4, blockAmount[4]++);
                 }
                 id = 4;
             } else {
@@ -806,14 +840,12 @@ public class CavedMain {
             // put block down using block data with those random numbers
 
             if (map[y][x] == null) {
-                map[y][x] = new BlockData(id, x, y, dur, amount[id]++);
+                map[y][x] = new BlockData(id, x, y, dur, blockAmount[id]++);
             }
         }
 
         return map;
     }
-
-    // general purpose methods
 
     // get a random int 
     public static int randomInt(int min, int max) {
