@@ -1,6 +1,5 @@
 # Caved
 This project's goal is to remake minecraft in a birds eye view format but using text instead of graphics inside a console.
-Written in Java
 >A replit containing this game can be found [here](https://replit.com/@zushiEdu/Caved).
 
 #### Future features
