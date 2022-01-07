@@ -293,6 +293,10 @@ public class CavedMain {
                     map[y][x] = null;
                 }
             }
+            for (int i = 0; i < mobs.length; i++) {
+                mobs[i] = null;
+            }
+            genMobs(size);
             genMap(size);
         }
 
@@ -359,12 +363,14 @@ public class CavedMain {
         if (instruction.equals("SAVE") || instruction.equals("WRITE")) {
             String fileName = inputString("Enter desired name of save");
             System.out.println("Saving...");
-            saveMap(map, fileName + ".txt");
+            saveMap(map, fileName + ".map");
+            saveMobs(mobs, fileName + ".mobs");
         }
         if (instruction.equals("LOAD") || instruction.equals("READ")) {
             String fileName = inputString("Enter desired name to read from");
             System.out.println("Loading...");
-            readMap(fileName + ".txt");
+            readMap(fileName + ".map");
+            readMobs(fileName + ".mobs");
         }
     }
 
@@ -601,6 +607,35 @@ public class CavedMain {
         }
     }
 
+    public static void saveMobs(MobData[] mobData, String name) {
+        // create a new empty file with given file name
+        File save = new File(name);
+
+        try {
+            // try to save the given map to the file in zmf format
+            save.createNewFile();
+
+            FileWriter writer = new FileWriter(save);
+
+            for (int i = 0; i < mobData.length; i++) {
+                if (mobData[i] != null) {
+                    writer.write(
+                            mobData[i].health + "," + mobData[i].x + "," + mobData[i].y + " ");
+                } else {
+                    writer.write("e ");
+                }
+
+                writer.write("\n");
+            }
+            writer.flush();
+            writer.close();
+            // error destruction
+        } catch (IOException a) {
+        } catch (NullPointerException b) {
+
+        }
+    }
+
     public static void readMap(String name) {
         for (int y = 0; y < map.length; y++) {
             for (int x = 0; x < map[y].length; x++) {
@@ -641,6 +676,58 @@ public class CavedMain {
                     // set block to corrosponding position in the readMap
                     BlockData block = new BlockData(id, x, y, 2, blockAmount[id]--);
                     map[y][x] = block;
+                }
+            }
+
+            reader.close();
+            // land of error destruction
+        } catch (IOException a) {
+        } catch (NullPointerException b) {
+        } catch (ReadOnlyBufferException c) {
+        } catch (NumberFormatException d) {
+        }
+
+        // return the read map
+    }
+
+    public static void readMobs(String name) {
+        for (int i = 0; i < mobs.length; i++) {
+            mobs[i] = null;
+        }
+        try {
+            // creates reader
+            FileReader reader = new FileReader(name);
+
+            File file = new File(name);
+            // creates character array of text file with text file length
+            char[] c = new char[(int) file.length()];
+
+            // read file to character array and convert to string
+            reader.read(c);
+            String a = new String(c);
+
+            // split file at spaces to isolate blocks
+            String spl[] = a.split(" ");
+
+            // remove any empty values in map
+            for (int i = 0; i < spl.length; i++) {
+                if (spl[i].contains("e") || spl[i].isEmpty()) {
+                    spl[i] = null;
+                }
+            }
+
+            // search through map, while ignoring empty blocks
+            for (int i = 0; i < spl.length; i++) {
+                if (!(spl[i] == null)) {
+                    // split blocks with values between commas
+                    String mod[] = spl[i].split(",");
+                    // send each number into their corrosponding spot in a new block
+                    int health = Integer.parseInt(mod[0].trim());
+                    int x = Integer.parseInt(mod[1].trim());
+                    int y = Integer.parseInt(mod[2].trim());
+                    // set block to corrosponding position in the readMap
+                    MobData mob = new MobData(health, x, y);
+                    mobs[i] = mob;
                 }
             }
 
