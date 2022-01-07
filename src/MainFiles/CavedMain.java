@@ -601,8 +601,7 @@ public class CavedMain {
         }
     }
 
-    public static BlockData[][] readMap(String name) {
-        BlockData[][] readMap = new BlockData[size][size];
+    public static void readMap(String name) {
         try {
             // creates reader
             FileReader reader = new FileReader(name);
@@ -636,7 +635,7 @@ public class CavedMain {
                     int y = Integer.parseInt(mod[2].trim());
                     // set block to corrosponding position in the readMap
                     BlockData block = new BlockData(id, x, y, 2, blockAmount[id]--);
-                    readMap[y][x] = block;
+                    map[y][x] = block;
                 }
             }
 
@@ -649,7 +648,6 @@ public class CavedMain {
         }
 
         // return the read map
-        return readMap;
     }
 
     // print whole map
