@@ -602,6 +602,11 @@ public class CavedMain {
     }
 
     public static void readMap(String name) {
+        for (int y = 0; y < map.length; y++) {
+            for (int x = 0; x < map[y].length; x++) {
+                map[y][x] = null;
+            }
+        }
         try {
             // creates reader
             FileReader reader = new FileReader(name);
