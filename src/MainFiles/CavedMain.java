@@ -245,7 +245,6 @@ public class CavedMain {
         }
 
         // killing
-
         if (instruction.charAt(0) == 'K') {
             String suffix = instruction.substring(1, instruction.length());
             if (suffix.equals("R")) {
@@ -493,7 +492,6 @@ public class CavedMain {
     // mine blocks
     public static void mineBlock(int x, int y) {
         if (map[playerY + y][playerX + x] != null) {
-
             int id = map[playerY + y][playerX + x].id;
             Boolean correctTool = checkTool(id);
             int dmg;
@@ -585,7 +583,6 @@ public class CavedMain {
     public static void saveMap(BlockData[][] mapData, String name) {
         // create a new empty file with given file name
         File save = new File(name);
-
         try {
             // try to save the given map to the file in zmf format
             save.createNewFile();
@@ -636,7 +633,6 @@ public class CavedMain {
             // error destruction
         } catch (IOException a) {
         } catch (NullPointerException b) {
-
         }
     }
 
@@ -812,9 +808,7 @@ public class CavedMain {
     // print top section of user interface
     public static void printTopUI() {
         // prints health tag
-
         System.out.print("[HEA:]");
-
         // prints full hearts
         for (int i = 0; i < playerHp && i < 3; i++) {
             System.out.print("[" + healthColor + "<3" + resetColor + "]");
@@ -896,7 +890,6 @@ public class CavedMain {
 
     // generate the map
     public static BlockData[][] genMap(int size) {
-
         // up to 18 blocks per size / 3 ( up to 18 blocks per chunk)
         int lim = 18 * (int) Math.pow(size / 9, 2);
         int rand = randomInt(0, lim);
