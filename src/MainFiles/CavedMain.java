@@ -488,31 +488,31 @@ public class CavedMain {
 
     // mine blocks
     public static void mineBlock(int x, int y) {
-        if (map[playerY + y][playerX + x] == null) {
-            // do nothing
-        }
-        int id = map[playerY + y][playerX + x].id;
-        Boolean correctTool = checkTool(id);
-        int dmg;
-        if (correctTool) {
-            dmg = 4;
-        } else {
-            dmg = 1;
-        }
-        // if block to the offset exists mine it
+        if (map[playerY + y][playerX + x] != null) {
 
-        if (checkBlock(playerX + x, playerY + y)) {
-            if (map[playerY + y][playerX + x].dur >= 1) {
-                map[playerY + y][playerX + x].dur = map[playerY + y][playerX + x].dur - dmg;
+            int id = map[playerY + y][playerX + x].id;
+            Boolean correctTool = checkTool(id);
+            int dmg;
+            if (correctTool) {
+                dmg = 4;
+            } else {
+                dmg = 1;
             }
-            if (map[playerY + y][playerX + x].dur <= 0) {
-                // add block id to the right to inventory
-                inventory[map[playerY + y][playerX + x].id]++;
-                // set id of block to the right to null
-                map[playerY + y][playerX + x] = null;
+            // if block to the offset exists mine it
+
+            if (checkBlock(playerX + x, playerY + y)) {
+                if (map[playerY + y][playerX + x].dur >= 1) {
+                    map[playerY + y][playerX + x].dur = map[playerY + y][playerX + x].dur - dmg;
+                }
+                if (map[playerY + y][playerX + x].dur <= 0) {
+                    // add block id to the right to inventory
+                    inventory[map[playerY + y][playerX + x].id]++;
+                    // set id of block to the right to null
+                    map[playerY + y][playerX + x] = null;
+                }
+            } else {
+                System.out.println("This block is not breakable.");
             }
-        } else {
-            System.out.println("This block is not breakable.");
         }
     }
 
