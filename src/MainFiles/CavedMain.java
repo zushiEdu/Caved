@@ -319,6 +319,10 @@ public class CavedMain {
             System.out.println("Block distribution - 'Sum' to view amounts of each block on the map");
             System.out.println("End game - 'Stop' or 'Exit' to exit / stop game");
             System.out.println("Press 'X to go back to spawn/bed");
+            System.out.println("Enter 'Save' or 'load' to save the world");
+            System.out.println("Enter 'Load' or 'Read' to load a world");
+            System.out.println("Make sure to remember the world name");
+            System.out.println("If you forgot the world name look for it in the games root directory");
             System.out.println("");
         }
 
