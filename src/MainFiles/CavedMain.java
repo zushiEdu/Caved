@@ -44,6 +44,7 @@ public class CavedMain {
     static String playerColor = "\u001B[34m";
     static String healthColor = "\u001B[31m";
     static String mobColor = "\u001B[31m";
+    static String backgroundColor = "\u001B[32m";
 
     static int tempChunkX;
     static int tempChunkY;
@@ -78,7 +79,7 @@ public class CavedMain {
         while (run) {
             moveMobs();
             printTopUI();
-            printChunk(map, "\u001B[32m", chunkX, chunkY);
+            printChunk(map, backgroundColor, chunkX, chunkY);
             printBottomUI();
             userInput();
             checkPlayerHealth();
@@ -88,7 +89,9 @@ public class CavedMain {
 
     // where everything is set up
     public static void setup() {
-        size = inputInt("Enter desired map size, size will work best if multiple of 9");
+        do {
+            size = inputInt("Enter desired map size, size will work best if multiple of 9, has to be bigger than 9");
+        } while (size < 9);
         System.out.println("Generating...");
         playerX = centerPlayer(size);
         playerY = centerPlayer(size);
@@ -99,7 +102,16 @@ public class CavedMain {
         map = new BlockData[size][size];
         mobs = new MobData[size];
         map = genMap(size);
-        genMobs(size);
+
+        String difficulty = inputString("Generate mobs? 'Y'/'Yes' or 'N'/'No'").toUpperCase();
+        while (!difficulty.equals("Y") && !difficulty.equals("YES") && !difficulty.equals("N")
+                && !difficulty.equals("NO")) {
+            difficulty = inputString("Generate mobs? 'Y'/'Yes' or 'N'/'No'").toUpperCase();
+        }
+        if (difficulty.equals("Y") || difficulty.equals("YES")) {
+            genMobs(size);
+        }
+
         System.out.println("Type 'help' for help menu");
     }
 
@@ -302,7 +314,11 @@ public class CavedMain {
             for (int i = 0; i < mobs.length; i++) {
                 mobs[i] = null;
             }
-            genMobs(size);
+
+            String difficulty = inputString("Generate mobs? 'Y'/'Yes' or 'N'/'No'").toUpperCase();
+            if (difficulty.equals("Y") || difficulty.equals("YES")) {
+                genMobs(size);
+            }
             genMap(size);
         }
 
@@ -769,11 +785,10 @@ public class CavedMain {
                 } else if (tryMob(x, y)) {
                     System.out.print(mobColor + "M " + resetColor);
                 } else {
-                    System.out.print("\u001B[32m" + "O " + resetColor);
+                    System.out.print(backgroundColor + "O " + resetColor);
                 }
 
             }
-
             System.out.println("");
         }
     }
@@ -782,7 +797,8 @@ public class CavedMain {
     public static void printChunk(BlockData[][] chunk, String backgroundColor, int chunkX, int chunkY) {
         try {
             for (int y = (((chunkY + 1) * 9) - 9); y <= (((chunkY + 1) * 9) - 1); y++) {
-                System.out.print("[|      ");
+                int screenRelativeY = y - (chunkY * 9) + 1;
+                System.out.print("[|  " + screenRelativeY + "   ");
                 for (int x = (((chunkX + 1) * 9) - 9); x <= (((chunkX + 1) * 9) - 1); x++) {
                     if (chunk[y][x] != null) {
                         System.out.print(
@@ -796,7 +812,7 @@ public class CavedMain {
                         System.out.print(backgroundColor + "O " + resetColor);
                     }
                 }
-                System.out.print("     |]");
+                System.out.print("  " + screenRelativeY + "  |]");
                 System.out.println("");
             }
         } catch (NullPointerException a) {
@@ -829,7 +845,6 @@ public class CavedMain {
         for (int i = 0; i < playerHp && i < 3; i++) {
             System.out.print("[" + healthColor + "<3" + resetColor + "]");
         }
-
         if (playerHp < 0) {
             playerHp = 0;
         }
@@ -839,10 +854,8 @@ public class CavedMain {
                 System.out.print("[<>]");
             }
         }
-
         String stringPlayerX = playerX + "";
         String stringPlayerY = playerY + "";
-
         if (stringPlayerX.length() > 3) {
             stringPlayerX = stringPlayerX.substring(stringPlayerX.length() - 2, stringPlayerX.length());
         }
@@ -850,10 +863,8 @@ public class CavedMain {
         if (stringPlayerY.length() > 3) {
             stringPlayerY = stringPlayerY.substring(stringPlayerY.length() - 2, stringPlayerY.length());
         }
-
         char[] splitStringPlayerX = stringPlayerX.toCharArray();
         char[] splitStringPlayerY = stringPlayerY.toCharArray();
-
         for (int i = 0; i < 3 - splitStringPlayerX.length; i++) {
             stringPlayerX = '0' + stringPlayerX;
         }
@@ -861,7 +872,6 @@ public class CavedMain {
         for (int i = 0; i < 3 - splitStringPlayerY.length; i++) {
             stringPlayerY = '0' + stringPlayerY;
         }
-
         System.out.println("[LOC:][" + stringPlayerX + "," + stringPlayerY + "]");
         System.out.println("[+----- 1 2 3 4 5 6 7 8 9 -----+]");
         System.out.print("[|                             |]");
@@ -878,7 +888,6 @@ public class CavedMain {
 
         String amt0 = inventory[inventorySelectorPos] + "";
         String amt1 = inventory[inventorySelectorPos + 1] + "";
-
         if (inventory[0] < 10) {
             System.out.print("0" + amt0 + blockCharacters[inventorySelectorPos]);
         } else if (inventory[0] >= 10) {
@@ -975,6 +984,7 @@ public class CavedMain {
             num = input.nextInt();
 
         } catch (InputMismatchException a) {
+            System.out.println("Invalid input");
         }
         return num;
     }
