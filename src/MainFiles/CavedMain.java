@@ -10,9 +10,9 @@ import java.io.IOException;
 import java.nio.ReadOnlyBufferException;
 
 /**
- *  Dev note from 2022-01-24 Hello future users
+ *  Dev note from 2022-01-24, Hello future users
  *
- *  Caved source coderuns best in VSCode, netbeans has a slow console
+ *  Caved source code runs best in VSCode, netbeans has a slow console
  *  
  *  I did play around with drawing and had graphics finished 
  *  ( no screenshot you'll have to take my word it was quite cool) 
