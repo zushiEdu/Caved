@@ -21,7 +21,7 @@ import java.nio.ReadOnlyBufferException;
  * 
  *  @author Ethan Huber
  */
-public class CavedMain {
+public class Main {
 
     /**
      * @param args the command line arguments
