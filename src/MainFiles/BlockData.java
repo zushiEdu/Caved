@@ -11,6 +11,7 @@ public class BlockData {
     int dur;
     int num;
 
+    // Constructor for blocks
     public BlockData(int identification, int x_coordinate, int y_coordinate, int durability, int number) {
         id = identification;
         x = x_coordinate;

@@ -10,14 +10,16 @@ import java.io.IOException;
 import java.nio.ReadOnlyBufferException;
 
 /**
+ *  Dev note from 2022-01-24 Hello future users
  *
- *  Runs best in VSCode, netbeans has a slow console
+ *  Caved source coderuns best in VSCode, netbeans has a slow console
  *  
  *  I did play around with drawing and had graphics finished 
  *  ( no screenshot you'll have to take my word it was quite cool) 
  *  I didn't like how the game looked and felt at that point
+ *  I sustained the text rending because of the retro feel I wanted to keep
  * 
- * @author Ethan Huber
+ *  @author Ethan Huber
  */
 public class CavedMain {
 
@@ -27,9 +29,10 @@ public class CavedMain {
     static Scanner input = new Scanner(System.in);
 
     // -- Dev Note --
-    // i am aware of the un-used block found on lines 24-28, i removed barrier blocks used for a deprecated feature
+    // i am aware of the un-used block found on lines 32-38, i removed barrier blocks used for a deprecated feature
     // instead of removing the block and changing the id of some other blocks, i kept it for compatability
     // --------------
+
     // map related variables
     static String[] matchingTools = { "AX", "SH", "AX", null, "PI", "AX" };
     static String[] blockCharacters = { "W", "D", "C", "V", "S", "B" };
@@ -83,9 +86,10 @@ public class CavedMain {
         input.close();
     }
 
+    // where everything is set up
     public static void setup() {
         size = inputInt("Enter desired map size, size will work best if multiple of 9");
-        message("Generating...");
+        System.out.println("Generating...");
         playerX = centerPlayer(size);
         playerY = centerPlayer(size);
         chunkX = posToChunk(centerPlayer(size));
@@ -99,6 +103,7 @@ public class CavedMain {
         System.out.println("Type 'help' for help menu");
     }
 
+    // checks for player health and resets player when they die
     public static void checkPlayerHealth() {
         if (playerHp <= 0) {
             System.out.println("You died.");
@@ -108,13 +113,15 @@ public class CavedMain {
 
             chunkX = posToChunk(spawnX);
             chunkY = posToChunk(spawnY);
+            // inventory gets divided by two when player is killed
             for (int i = 0; i < inventory.length; i++) {
-                inventory[i] = inventory[i] / 5;
+                inventory[i] = inventory[i] / 2;
             }
             playerHp = 3;
         }
     }
 
+    // mob activity cycle
     public static void moveMobs() {
         // removes any dead monsters
         for (int i = 0; i < mobs.length; i++) {
@@ -401,6 +408,7 @@ public class CavedMain {
                 System.out.println("3. Pickaxe 'pickaxe', 3 wood");
                 System.out.println("4. Shovel 'shovel', 1 wood");
                 System.out.println("5. Bed 'bed', 5 wood");
+                System.out.println("Type 'cancel' to cancel");
                 String item = inputString("Type name of item in quotation marks to craft");
                 item = item.toUpperCase();
                 if (item.equals("DIRT")) {
@@ -441,8 +449,10 @@ public class CavedMain {
                         System.out.println("A bed was crafted");
                         inventory[0] = inventory[0] - 5;
                     }
+                } else if (item.equals("CANCEL")) {
+                    System.out.println("No item was crafted.");
                 } else {
-                    System.out.println(item + "could not be crafted.");
+                    System.out.println(item + " could not be crafted.");
                 }
             } else if (map[playerY + y][playerX + x].id == 5) {
                 // interacting with bed
@@ -469,12 +479,17 @@ public class CavedMain {
         // if block to the offset doesnt exist then place block
         if (!checkBlock(playerX + x, playerY + y)) {
             // if enough blocks in inv exists
-            if (inventory[block] > 0) {
-                // remove block
-                inventory[block]--;
-                map[playerY + y][playerX + x] = new BlockData(block, playerX + x, playerY + y, 3, blockAmount[block]++);
-            } else {
-                System.out.println("Not enough blocks of that type");
+            try {
+                if (inventory[block] > 0) {
+                    // remove block
+                    inventory[block]--;
+                    map[playerY + y][playerX + x] = new BlockData(block, playerX + x, playerY + y, 3,
+                            blockAmount[block]++);
+                } else {
+                    System.out.println("Not enough blocks of that type");
+                }
+            } catch (ArrayIndexOutOfBoundsException a) {
+
             }
         }
     }
@@ -563,10 +578,12 @@ public class CavedMain {
 
     }
 
+    // converts positions to chunks
     public static int posToChunk(int pos) {
         return pos / 9;
     }
 
+    // centers player on the map
     public static int centerPlayer(int size) {
         if ((size / 9) % 2 == 0) {
             return (size / 2) + 4;
@@ -575,11 +592,7 @@ public class CavedMain {
         }
     }
 
-    public static String message(String message) {
-        System.out.println(message);
-        return "06/07/20";
-    }
-
+    // saves the map
     public static void saveMap(BlockData[][] mapData, String name) {
         // create a new empty file with given file name
         File save = new File(name);
@@ -608,6 +621,7 @@ public class CavedMain {
         }
     }
 
+    // saves the mobs on the map
     public static void saveMobs(MobData[] mobData, String name) {
         // create a new empty file with given file name
         File save = new File(name);
@@ -636,6 +650,7 @@ public class CavedMain {
         }
     }
 
+    // reads the map
     public static void readMap(String name) {
         for (int y = 0; y < map.length; y++) {
             for (int x = 0; x < map[y].length; x++) {
@@ -690,6 +705,7 @@ public class CavedMain {
         // return the read map
     }
 
+    // reads the mobs and puts them on the map
     public static void readMobs(String name) {
         for (int i = 0; i < mobs.length; i++) {
             mobs[i] = null;
