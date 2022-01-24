@@ -997,4 +997,4 @@ public class CavedMain {
         String str = input.next();
         return str;
     }
-}
+} // 1000 lines yeah!
