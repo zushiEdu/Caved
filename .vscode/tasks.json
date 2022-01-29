@@ -3,7 +3,7 @@
 	"tasks": [
 		{
 			"type": "java",
-			"mainClass": "MainFiles.CavedMain",
+			"mainClass": "MainFiles.Main",
 			"targetPath": "${workspaceFolder}/${workspaceFolderBasename}.jar",
 			"elements": [
 				"${compileOutput}",
