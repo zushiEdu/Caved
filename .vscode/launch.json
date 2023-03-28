@@ -9,6 +9,13 @@
             "name": "Launch Main",
             "request": "launch",
             "mainClass": "MainFiles.Main",
+            "projectName": "Caved_31ae8721"
+        },
+        {
+            "type": "java",
+            "name": "Launch Main",
+            "request": "launch",
+            "mainClass": "MainFiles.Main",
             "projectName": "Caved_90310cb"
         },
         {
